@@ -16,7 +16,8 @@ export async function POST(req: NextRequest) {
     await mkdir(dir, { recursive: true });
     await writeFile(join(dir, filename), buffer);
 
-    return NextResponse.json({ success: true, url: `/uploads/${filename}` });
+    // Return API-served URL (works at runtime, not just build time)
+    return NextResponse.json({ success: true, url: `/api/uploads/${filename}` });
   } catch (error) {
     console.error("Upload error:", error);
     return NextResponse.json({ error: "Upload failed" }, { status: 500 });
