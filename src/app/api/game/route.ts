@@ -134,8 +134,8 @@ export async function POST(req: NextRequest) {
 
       // ─── Library-based auto challenge with progressive reveal ───
       case "start_library_challenge": {
-        const { category = "anime", difficulty, franchise, autoQueue = false } = body;
-        const result = engine.startLibraryChallenge(category, difficulty, franchise, autoQueue);
+        const { category = "anime", difficulty, franchise, autoQueue = false, timeLimit } = body;
+        const result = engine.startLibraryChallenge(category, difficulty, franchise, autoQueue, timeLimit);
         return NextResponse.json(result);
       }
       case "set_auto_queue": {

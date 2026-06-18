@@ -73,6 +73,7 @@ export default function AdminPage() {
   const [imgUrl, setImgUrl] = useState("");
   const [imgRevealUrl, setImgRevealUrl] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [imgTimer, setImgTimer] = useState(30);
 
   // NEW: Power Battle state
   const [battleFighters, setBattleFighters] = useState([
@@ -203,7 +204,7 @@ export default function AdminPage() {
     gameAction("start_image_challenge", {
       imageUrl: imgUrl, correctAnswer: imgAnswer, aliases: imgAliases,
       difficulty: imgDifficulty, mode: "guess_anime", revealType: imgRevealType,
-      revealImageUrl: imgRevealUrl || imgUrl, timeLimit: 30,
+      revealImageUrl: imgRevealUrl || imgUrl, timeLimit: imgTimer,
       category: imgMode,
     });
   };
@@ -910,7 +911,7 @@ export default function AdminPage() {
               <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 mb-4">
                 <h3 className="text-sm font-bold text-green-300 mb-2">⚡ QUICK LAUNCH (from library — no upload needed)</h3>
                 <p className="text-xs text-gray-400 mb-3">800+ built-in entries. Auto-selects a random challenge. Viewers type their answer in chat.</p>
-                <div className="grid grid-cols-2 gap-2 mb-3">
+                <div className="grid grid-cols-3 gap-2 mb-3">
                   <div>
                     <label className="text-xs text-gray-500 block mb-1">Category</label>
                     <select value={imgMode} onChange={e => setImgMode(e.target.value)} className="w-full text-sm">
@@ -935,15 +936,28 @@ export default function AdminPage() {
                       <option value="extreme">Extreme (60 pts)</option>
                     </select>
                   </div>
+                  <div>
+                    <label className="text-xs text-gray-500 block mb-1">Timer</label>
+                    <select value={imgTimer} onChange={e => setImgTimer(Number(e.target.value))} className="w-full text-sm">
+                      <option value={10}>10 sec</option>
+                      <option value={15}>15 sec</option>
+                      <option value={20}>20 sec</option>
+                      <option value={30}>30 sec</option>
+                      <option value={45}>45 sec</option>
+                      <option value={60}>60 sec</option>
+                      <option value={90}>90 sec</option>
+                      <option value={120}>2 min</option>
+                    </select>
+                  </div>
                 </div>
                 <button
-                  onClick={() => gameAction("start_library_challenge", { category: imgMode, difficulty: imgDifficulty || undefined, autoQueue: false })}
+                  onClick={() => gameAction("start_library_challenge", { category: imgMode, difficulty: imgDifficulty || undefined, autoQueue: false, timeLimit: imgTimer })}
                   className="btn-neon btn-neon-green w-full text-lg py-3"
                 >
                   🚀 LAUNCH SINGLE ROUND
                 </button>
                 <button
-                  onClick={() => gameAction("start_library_challenge", { category: imgMode, difficulty: imgDifficulty || undefined, autoQueue: true })}
+                  onClick={() => gameAction("start_library_challenge", { category: imgMode, difficulty: imgDifficulty || undefined, autoQueue: true, timeLimit: imgTimer })}
                   className="btn-neon btn-neon-pink w-full py-2 mt-2"
                 >
                   🔄 AUTO-PLAY (continuous rounds)

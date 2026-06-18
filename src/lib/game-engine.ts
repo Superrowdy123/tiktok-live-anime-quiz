@@ -290,20 +290,23 @@ export class GameEngine {
   private autoQueueDifficulty: GuessDifficulty | undefined = undefined;
   private autoQueueEnabled = false;
   private autoQueueTimer: ReturnType<typeof setTimeout> | null = null;
+  private autoQueueTimeLimit: number | undefined = undefined;
 
-  startLibraryChallenge(category: GuessCategory, difficulty?: GuessDifficulty, franchise?: string, autoQueue = false) {
+  startLibraryChallenge(category: GuessCategory, difficulty?: GuessDifficulty, franchise?: string, autoQueue = false, timeLimit?: number) {
     const mcq = getRandomMCQuestion(category, difficulty, franchise);
     if (!mcq) return { success: false, error: "No entries found" };
     const { entry, options, answer } = mcq;
     this.autoQueueCategory = category;
     this.autoQueueDifficulty = difficulty;
     this.autoQueueEnabled = autoQueue;
+    this.autoQueueTimeLimit = timeLimit;
+    const tl = timeLimit || 30;
     this.startImageChallenge({
       id: `lib_${entry.id}_${Date.now()}`, mode: "guess_anime",
       imageUrl: "",
       correctAnswer: entry.answer, aliases: entry.aliases,
       difficulty: entry.difficulty, revealType: category as ImageChallenge["revealType"],
-      timeLimit: 30, pointValue: IMAGE_POINTS[entry.difficulty] || 25,
+      timeLimit: tl, pointValue: IMAGE_POINTS[entry.difficulty] || 25,
       description: entry.description, category,
       // A/B/C/D multiple choice options
       mcOptions: options.map((o, i) => `${String.fromCharCode(65 + i)}) ${o}`),
@@ -405,7 +408,7 @@ export class GameEngine {
     // Auto-queue next round after 5 seconds
     if (this.autoQueueEnabled && this.autoQueueCategory) {
       this.autoQueueTimer = setTimeout(() => {
-        this.startLibraryChallenge(this.autoQueueCategory!, this.autoQueueDifficulty, undefined, true);
+        this.startLibraryChallenge(this.autoQueueCategory!, this.autoQueueDifficulty, undefined, true, this.autoQueueTimeLimit);
       }, 5000);
     }
   }
