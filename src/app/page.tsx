@@ -46,7 +46,7 @@ interface GameData {
   totalRounds: number;
 }
 
-type TabType = "control" | "leaderboard" | "stats" | "tiktok" | "simulate";
+type TabType = "control" | "leaderboard" | "stats" | "tiktok" | "simulate" | "image" | "battle";
 
 export default function AdminPage() {
   const [game, setGame] = useState<GameData | null>(null);
@@ -63,6 +63,22 @@ export default function AdminPage() {
   const autoAdvanceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [addPointsAmount, setAddPointsAmount] = useState(10);
   const pollRef = useRef<ReturnType<typeof setInterval>>(null);
+
+  // NEW: Image Challenge state
+  const [imgMode, setImgMode] = useState("guess_anime");
+  const [imgAnswer, setImgAnswer] = useState("");
+  const [imgAliases, setImgAliases] = useState("");
+  const [imgDifficulty, setImgDifficulty] = useState("medium");
+  const [imgRevealType, setImgRevealType] = useState("eyes");
+  const [imgUrl, setImgUrl] = useState("");
+  const [imgRevealUrl, setImgRevealUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
+
+  // NEW: Power Battle state
+  const [battleFighters, setBattleFighters] = useState([
+    { name: "", anime: "" }, { name: "", anime: "" }, { name: "", anime: "" },
+  ]);
+  const [battleTime, setBattleTime] = useState(30);
 
   const fetchGame = useCallback(async () => {
     try {
@@ -165,6 +181,37 @@ export default function AdminPage() {
 
   const [tiktokError, setTiktokError] = useState<string | null>(null);
   const [tiktokLoading, setTiktokLoading] = useState(false);
+
+  const uploadImage = async (file: File, field: "main" | "reveal") => {
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/game/upload", { method: "POST", body: formData });
+      const data = await res.json();
+      if (data.success) {
+        if (field === "main") setImgUrl(data.url);
+        else setImgRevealUrl(data.url);
+        addEvent("upload", `Image uploaded: ${data.url}`);
+      }
+    } catch { /* ignore */ }
+    setUploading(false);
+  };
+
+  const startImageChallenge = () => {
+    if (!imgUrl || !imgAnswer) return;
+    gameAction("start_image_challenge", {
+      imageUrl: imgUrl, correctAnswer: imgAnswer, aliases: imgAliases,
+      difficulty: imgDifficulty, mode: imgMode, revealType: imgRevealType,
+      revealImageUrl: imgRevealUrl || imgUrl, timeLimit: 30,
+    });
+  };
+
+  const startPowerBattle = () => {
+    const valid = battleFighters.filter(f => f.name.trim());
+    if (valid.length < 2) return;
+    gameAction("start_power_battle", { fighters: valid, timeLimit: battleTime });
+  };
 
   const connectTikTok = async () => {
     if (!tiktokUsername.trim()) {
@@ -304,11 +351,13 @@ export default function AdminPage() {
       <nav className="flex gap-2 mx-4 mt-4 overflow-x-auto">
         {(
           [
-            ["control", "🎮 Control"],
-            ["leaderboard", "🏆 Leaderboard"],
+            ["control", "🎮 Quiz"],
+            ["image", "🖼️ Image"],
+            ["battle", "⚔️ Battle"],
+            ["leaderboard", "🏆 Board"],
             ["stats", "📊 Stats"],
             ["tiktok", "📱 TikTok"],
-            ["simulate", "🧪 Simulate"],
+            ["simulate", "🧪 Test"],
           ] as [TabType, string][]
         ).map(([key, label]) => (
           <button
@@ -850,6 +899,206 @@ export default function AdminPage() {
             </div>
           </div>
         )}
+        {/* ─── Image Challenge Tab ─── */}
+        {tab === "image" && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-fade-in">
+            <div className="glass-card neon-border p-5">
+              <h2 className="text-lg font-bold text-purple-300 mb-4" style={{ fontFamily: "Orbitron" }}>🖼️ GUESS MODE</h2>
+
+              {/* Quick Launch from Library */}
+              <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 mb-4">
+                <h3 className="text-sm font-bold text-green-300 mb-2">⚡ QUICK LAUNCH (from library — no upload needed)</h3>
+                <p className="text-xs text-gray-400 mb-3">800+ built-in entries. Auto-selects a random challenge. Viewers type their answer in chat.</p>
+                <div className="grid grid-cols-2 gap-2 mb-3">
+                  <div>
+                    <label className="text-xs text-gray-500 block mb-1">Category</label>
+                    <select value={imgMode} onChange={e => setImgMode(e.target.value)} className="w-full text-sm">
+                      <option value="anime">🎬 Guess The Anime</option>
+                      <option value="character">👤 Guess The Character</option>
+                      <option value="eyes">👁️ Guess From Eyes</option>
+                      <option value="hair">💇 Guess From Hair</option>
+                      <option value="silhouette">🌑 Guess From Silhouette</option>
+                      <option value="weapon">⚔️ Guess The Weapon</option>
+                      <option value="outfit">👕 Guess From Outfit</option>
+                      <option value="aura">✨ Guess From Aura</option>
+                      <option value="symbol">🔷 Guess The Symbol</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 block mb-1">Difficulty</label>
+                    <select value={imgDifficulty} onChange={e => setImgDifficulty(e.target.value)} className="w-full text-sm">
+                      <option value="">Any</option>
+                      <option value="easy">Easy (15 pts)</option>
+                      <option value="medium">Medium (25 pts)</option>
+                      <option value="hard">Hard (40 pts)</option>
+                      <option value="extreme">Extreme (60 pts)</option>
+                    </select>
+                  </div>
+                </div>
+                <button
+                  onClick={() => gameAction("start_library_challenge", { category: imgMode, difficulty: imgDifficulty || undefined, autoQueue: false })}
+                  className="btn-neon btn-neon-green w-full text-lg py-3"
+                >
+                  🚀 LAUNCH SINGLE ROUND
+                </button>
+                <button
+                  onClick={() => gameAction("start_library_challenge", { category: imgMode, difficulty: imgDifficulty || undefined, autoQueue: true })}
+                  className="btn-neon btn-neon-pink w-full py-2 mt-2"
+                >
+                  🔄 AUTO-PLAY (continuous rounds)
+                </button>
+                <button
+                  onClick={() => { gameAction("set_auto_queue", { enabled: false }); gameAction("reveal_image_answer"); }}
+                  className="btn-neon btn-neon-red w-full py-2 mt-1 text-sm"
+                >
+                  ⏹️ STOP AUTO-PLAY
+                </button>
+              </div>
+
+              {/* Manual Upload Section */}
+              <details className="bg-slate-800/30 rounded-lg">
+                <summary className="p-3 text-sm text-gray-400 cursor-pointer hover:text-gray-200">📤 Or upload your own image...</summary>
+                <div className="p-3 space-y-3 border-t border-slate-700">
+                  <div>
+                    <label className="text-sm text-gray-400 block mb-1">Image</label>
+                    <input type="file" accept="image/*" onChange={e => e.target.files?.[0] && uploadImage(e.target.files[0], "main")}
+                      className="w-full text-sm text-gray-400 file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-purple-600 file:text-white" />
+                    {imgUrl && <img src={imgUrl} alt="Preview" className="mt-2 max-h-24 rounded-lg" />}
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-400 block mb-1">Correct Answer</label>
+                    <input type="text" value={imgAnswer} onChange={e => setImgAnswer(e.target.value)} placeholder="e.g. Naruto" className="w-full" />
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-400 block mb-1">Aliases (comma-separated)</label>
+                    <input type="text" value={imgAliases} onChange={e => setImgAliases(e.target.value)} placeholder="e.g. Naruto Uzumaki, naruto shippuden" className="w-full" />
+                  </div>
+                  <button onClick={startImageChallenge} disabled={!imgUrl || !imgAnswer || uploading}
+                    className={`btn-neon w-full py-2 ${!imgUrl || !imgAnswer ? "bg-slate-700 text-gray-500 cursor-not-allowed" : "btn-neon-purple"}`}>
+                    {uploading ? "📤 Uploading..." : "Start With Upload"}
+                  </button>
+                </div>
+              </details>
+
+              <button onClick={() => gameAction("reveal_image_answer")} className="btn-neon btn-neon-gold w-full mt-3">
+                👁️ Reveal Answer Now
+              </button>
+            </div>
+
+            {/* Live Status */}
+            <div className="glass-card neon-border p-5">
+              <h2 className="text-lg font-bold text-cyan-300 mb-4" style={{ fontFamily: "Orbitron" }}>CHALLENGE STATUS</h2>
+              <div className="text-center py-8">
+                <div className="text-5xl mb-3 animate-float">🧠</div>
+                <p className="text-gray-400 mb-2">Click "LAUNCH RANDOM CHALLENGE" to start!</p>
+                <p className="text-xs text-gray-600">Viewers type their answer in TikTok chat.</p>
+                <p className="text-xs text-gray-600">AI fuzzy-matching allows minor typos.</p>
+                <p className="text-xs text-gray-600 mt-2">30-second countdown with sound effects.</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ─── Power Battle Tab ─── */}
+        {tab === "battle" && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-fade-in">
+            <div className="glass-card neon-border p-5">
+              <h2 className="text-lg font-bold text-orange-300 mb-4" style={{ fontFamily: "Orbitron" }}>⚔️ POWER SCALING ARENA</h2>
+
+              <div className="space-y-3">
+                <p className="text-xs text-gray-400">Enter 2-6 fighters. Viewers vote by typing A, B, C in chat.</p>
+                {battleFighters.map((f, i) => (
+                  <div key={i} className="flex gap-2 items-center">
+                    <span className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center font-black text-white shrink-0">
+                      {String.fromCharCode(65 + i)}
+                    </span>
+                    <input type="text" value={f.name} onChange={e => { const nf = [...battleFighters]; nf[i] = { ...nf[i], name: e.target.value }; setBattleFighters(nf); }}
+                      placeholder={`Fighter ${i + 1}`} className="flex-1" />
+                    <input type="text" value={f.anime} onChange={e => { const nf = [...battleFighters]; nf[i] = { ...nf[i], anime: e.target.value }; setBattleFighters(nf); }}
+                      placeholder="Anime" className="w-28" />
+                  </div>
+                ))}
+
+                <div className="flex gap-2">
+                  <button onClick={() => setBattleFighters([...battleFighters, { name: "", anime: "" }])}
+                    className="btn-neon bg-slate-700 text-gray-300 text-xs" disabled={battleFighters.length >= 6}>+ Add</button>
+                  <button onClick={() => battleFighters.length > 2 && setBattleFighters(battleFighters.slice(0, -1))}
+                    className="btn-neon bg-slate-700 text-gray-300 text-xs" disabled={battleFighters.length <= 2}>- Remove</button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-xs text-gray-500 block mb-1">Vote Time</label>
+                    <input type="number" value={battleTime} onChange={e => setBattleTime(Number(e.target.value))} min={10} max={120} className="w-full" />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 block mb-1">Mode</label>
+                    <select className="w-full" id="battleMode" defaultValue="vote">
+                      <option value="vote">Standard Vote</option>
+                      <option value="tug_of_war">Tug of War</option>
+                    </select>
+                  </div>
+                </div>
+
+                <button
+                  onClick={async () => {
+                    const valid = battleFighters.filter(f => f.name.trim());
+                    if (valid.length < 2) return;
+                    const mode = (document.getElementById("battleMode") as HTMLSelectElement)?.value || "vote";
+                    const action = mode === "tug_of_war" ? "start_tug_of_war" : "start_battle";
+                    try {
+                      await fetch("/api/game/arena", {
+                        method: "POST", headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ action, fighters: valid, timeLimit: battleTime }),
+                      });
+                      addEvent("arena", `Battle started: ${valid.map(f => f.name).join(" vs ")}`);
+                    } catch { /* ignore */ }
+                  }}
+                  disabled={battleFighters.filter(f => f.name.trim()).length < 2}
+                  className={`btn-neon w-full text-lg py-3 ${battleFighters.filter(f => f.name.trim()).length < 2 ? "bg-slate-700 text-gray-500 cursor-not-allowed" : "btn-neon-pink"}`}
+                >
+                  ⚔️ START BATTLE
+                </button>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <button onClick={async () => { await fetch("/api/game/arena", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "end" }) }); addEvent("arena", "Battle ended"); }} className="btn-neon btn-neon-gold text-xs">🏁 End</button>
+                  <button onClick={async () => { await fetch("/api/game/arena", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "trigger_event" }) }); addEvent("arena", "Event triggered"); }} className="btn-neon btn-neon-blue text-xs">🎲 Event</button>
+                  <button onClick={async () => { await fetch("/api/game/arena", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "reset_votes" }) }); addEvent("arena", "Votes reset"); }} className="btn-neon bg-slate-700 text-gray-300 text-xs">🔄 Reset</button>
+                </div>
+
+                {/* Boss Raid */}
+                <div className="border-t border-slate-700 pt-3 mt-3">
+                  <h3 className="text-sm font-bold text-red-400 mb-2">👹 BOSS RAID</h3>
+                  <div className="flex gap-2">
+                    <input type="text" placeholder="Boss name (e.g. Madara)" className="flex-1" id="bossName" />
+                    <input type="number" placeholder="HP" defaultValue={1000} className="w-20" id="bossHp" />
+                  </div>
+                  <button onClick={async () => {
+                    const name = (document.getElementById("bossName") as HTMLInputElement)?.value;
+                    const hp = Number((document.getElementById("bossHp") as HTMLInputElement)?.value) || 1000;
+                    if (!name) return;
+                    await fetch("/api/game/arena", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "start_boss_raid", bossName: name, bossHp: hp, timeLimit: 60 }) });
+                    addEvent("arena", `Boss raid started: ${name}`);
+                  }} className="btn-neon btn-neon-red w-full mt-2 text-sm">👹 START BOSS RAID</button>
+                </div>
+              </div>
+            </div>
+
+            {/* Live Arena Status */}
+            <div className="glass-card neon-border p-5">
+              <h2 className="text-lg font-bold text-cyan-300 mb-4" style={{ fontFamily: "Orbitron" }}>ARENA STATUS</h2>
+              <div className="text-center py-8">
+                <div className="text-5xl mb-3 animate-float">⚔️</div>
+                <p className="text-gray-400 mb-2">Set up fighters and click START BATTLE!</p>
+                <p className="text-xs text-gray-600">Viewers vote by typing A, B, C in TikTok chat.</p>
+                <p className="text-xs text-gray-600 mt-1">Live vote bars update on the overlay.</p>
+                <p className="text-xs text-gray-600 mt-1">Random events trigger during battles.</p>
+                <p className="text-xs text-gray-600 mt-1">Attack animations at 10, 50, 100, 250, 500 votes.</p>
+              </div>
+            </div>
+          </div>
+        )}
+
       </main>
     </div>
   );

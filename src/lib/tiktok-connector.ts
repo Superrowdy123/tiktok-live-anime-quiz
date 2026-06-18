@@ -100,8 +100,19 @@ export async function connectToTikTok(username: string): Promise<{ success: bool
 
       console.log(`[TikTok Chat] ${displayName}: ${message}`);
 
-      // Forward to game engine
+      // Forward to game engine AND arena engine
       const engine = getGameEngine();
+
+      // Try arena first (if active)
+      try {
+        const { getArenaEngine } = require("./arena-engine");
+        const arena = getArenaEngine();
+        const arenaState = arena.getState();
+        if (arenaState.status === "voting" || arenaState.status === "event") {
+          arena.processVote(username, displayName, message);
+        }
+      } catch { /* arena not loaded */ }
+
       const result = engine.processAnswer(username, displayName, message);
 
       if (result.correct) {

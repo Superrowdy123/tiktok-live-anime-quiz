@@ -9,6 +9,7 @@ import {
 
 interface GameData {
   status: string;
+  gameMode: string;
   currentQuestion: {
     id: number; type: string; difficulty: string;
     question: string; options: string[]; answer: string; timeLimit: number;
@@ -35,6 +36,19 @@ interface GameData {
     correctAnswers: number; fastestAnswer: number | null;
     fastestPlayer: string | null; mostActivePlayer: string | null; sessionDuration: number;
   };
+  imageChallenge: {
+    mode: string; status: string; imageUrl: string; revealImageUrl?: string;
+    difficulty: string; revealType?: string; timeRemaining: number;
+    correctAnswer: string | null; winnersCount: number;
+    winners: { username: string; displayName: string; time: number }[];
+    answerFeed: { username: string; displayName: string; answer: string; correct: boolean; time: number }[];
+    revealProgress: number; pointValue: number;
+    description?: string | null; category?: string | null;
+  } | null;
+  powerBattle: {
+    id: string; status: string; timeRemaining: number; totalVotes: number;
+    fighters: { label: string; name: string; anime: string; stats: Record<string, number>; votes: number; percentage: number }[];
+  } | null;
 }
 
 interface MascotMsg { text: string; id: number; }
@@ -52,6 +66,8 @@ export default function OverlayPage() {
   const [audioReady, setAudioReady] = useState(false);
   const [screenFlash, setScreenFlash] = useState<string | null>(null);
   const [shakeScreen, setShakeScreen] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [arenaData, setArenaData] = useState<any>(null);
   const msgIdRef = useRef(0);
   const floatIdRef = useRef(0);
   const pollRef = useRef<ReturnType<typeof setInterval>>(null);
@@ -59,12 +75,17 @@ export default function OverlayPage() {
 
   const fetchGame = useCallback(async () => {
     try {
-      const res = await fetch("/api/game");
-      const data: GameData = await res.json();
+      const [gameRes, arenaRes] = await Promise.all([
+        fetch("/api/game"),
+        fetch("/api/game/arena"),
+      ]);
+      const data: GameData = await gameRes.json();
+      const arena = await arenaRes.json();
       setGame(prev => {
         setPrevGame(prev);
         return data;
       });
+      setArenaData(arena);
     } catch { /* ignore */ }
   }, []);
 
@@ -344,7 +365,363 @@ export default function OverlayPage() {
 
           {/* Main */}
           <div className="flex-1 flex flex-col lg:flex-row gap-3 px-4 md:px-6 pb-3 md:pb-4 overflow-hidden">
-            {/* Question */}
+            {/* ═══ IMAGE CHALLENGE MODE ═══ */}
+            {game.gameMode === "image_guess" && game.imageChallenge && (
+              <div className="flex-1 flex flex-col min-h-0">
+                <div className="glass-card neon-border flex-1 flex flex-col p-4 md:p-6 animate-scale-in overflow-hidden">
+                  {/* Header */}
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="px-4 py-1.5 rounded-full font-black text-sm md:text-lg uppercase tracking-wider bg-purple-500/30 text-purple-300 border-2 border-purple-500/60" style={{ fontFamily: "Orbitron" }}>
+                      {game.imageChallenge.category === "anime" ? "🎬 GUESS THE ANIME" :
+                       game.imageChallenge.category === "character" ? "👤 GUESS THE CHARACTER" :
+                       game.imageChallenge.category === "eyes" ? "👁️ GUESS FROM EYES" :
+                       game.imageChallenge.category === "hair" ? "💇 GUESS THE HAIR" :
+                       game.imageChallenge.category === "silhouette" ? "🌑 GUESS THE SILHOUETTE" :
+                       game.imageChallenge.category === "weapon" ? "⚔️ GUESS THE WEAPON" :
+                       game.imageChallenge.category === "outfit" ? "👕 GUESS THE OUTFIT" :
+                       game.imageChallenge.category === "aura" ? "✨ GUESS THE AURA" :
+                       game.imageChallenge.category === "symbol" ? "🔷 GUESS THE SYMBOL" :
+                       game.imageChallenge.mode === "guess_anime" ? "🖼️ GUESS THE ANIME" :
+                       `🎭 GUESS: ${(game.imageChallenge.revealType || "character").toUpperCase()}`}
+                      {" • "}{game.imageChallenge.pointValue}pts
+                    </div>
+                    <div className={`flex items-center gap-2 px-4 py-2 rounded-full font-black ${
+                      game.imageChallenge.timeRemaining <= 5 ? "bg-red-500/30 text-red-300 border-2 border-red-500/60 animate-pulse" :
+                      game.imageChallenge.timeRemaining <= 10 ? "bg-yellow-500/30 text-yellow-300 border-2 border-yellow-500/60" :
+                      "bg-slate-700/50 text-cyan-300 border-2 border-cyan-500/40"
+                    }`}>
+                      <span className="text-xl md:text-3xl" style={{ fontFamily: "Orbitron" }}>{game.imageChallenge.timeRemaining}</span>
+                      <span className="text-xs opacity-60">SEC</span>
+                    </div>
+                  </div>
+
+                  {/* Timer Bar */}
+                  <div className="w-full bg-slate-800/60 rounded-full h-2 md:h-3 mb-4">
+                    <div className={`h-full rounded-full transition-all duration-1000 ${
+                      game.imageChallenge.timeRemaining <= 5 ? "bg-gradient-to-r from-red-600 to-red-400" :
+                      game.imageChallenge.timeRemaining <= 10 ? "bg-gradient-to-r from-yellow-600 to-yellow-400" :
+                      "bg-gradient-to-r from-purple-600 to-pink-400"
+                    }`} style={{ width: `${(game.imageChallenge.timeRemaining / 30) * 100}%` }} />
+                  </div>
+
+                  {/* Challenge Content — Progressive Reveal */}
+                  <div className="flex-1 flex items-center justify-center relative overflow-hidden rounded-2xl bg-slate-900/50">
+                    {game.imageChallenge.imageUrl ? (
+                      /* Image mode: progressive blur reveal */
+                      <div className="relative w-full h-full flex items-center justify-center">
+                        <img
+                          src={game.imageChallenge.status === "revealing" && game.imageChallenge.revealImageUrl
+                            ? game.imageChallenge.revealImageUrl : game.imageChallenge.imageUrl}
+                          alt="Challenge"
+                          className="max-h-full max-w-full object-contain rounded-xl transition-all duration-500"
+                          style={game.imageChallenge.status === "active"
+                            ? { filter: `blur(${Math.max(0, 30 - game.imageChallenge.revealProgress * 0.3)}px) brightness(${0.4 + game.imageChallenge.revealProgress * 0.006})` }
+                            : { filter: "none" }}
+                        />
+                        {/* Reveal progress ring */}
+                        {game.imageChallenge.status === "active" && (
+                          <div className="absolute top-3 left-3 glass-card px-3 py-1 rounded-full text-xs">
+                            <span className="text-purple-300 font-bold">Clarity: {Math.round(game.imageChallenge.revealProgress)}%</span>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      /* Library mode: text clue with progressive reveal effect */
+                      <div className="text-center px-6 py-8 w-full relative">
+                        {/* Category icon */}
+                        <div className="text-6xl md:text-8xl mb-6 animate-float">
+                          {game.imageChallenge.category === "anime" ? "🎬" :
+                           game.imageChallenge.category === "character" ? "👤" :
+                           game.imageChallenge.category === "weapon" ? "⚔️" :
+                           game.imageChallenge.category === "symbol" ? "🔷" :
+                           game.imageChallenge.category === "eyes" ? "👁️" :
+                           game.imageChallenge.category === "hair" ? "💇" :
+                           game.imageChallenge.category === "silhouette" ? "🌑" :
+                           game.imageChallenge.category === "aura" ? "✨" :
+                           game.imageChallenge.category === "outfit" ? "👕" : "❓"}
+                        </div>
+
+                        {/* Description with progressive word reveal */}
+                        {game.imageChallenge.description && game.imageChallenge.status === "active" && (() => {
+                          const words = game.imageChallenge.description.split(" ");
+                          const revealCount = Math.max(3, Math.ceil(words.length * (game.imageChallenge.revealProgress / 100)));
+                          const visibleWords = words.slice(0, revealCount);
+                          const hiddenCount = Math.max(0, words.length - revealCount);
+                          return (
+                            <div>
+                              <p className="text-xl md:text-3xl lg:text-4xl font-bold text-white leading-relaxed">
+                                {visibleWords.join(" ")}
+                                {hiddenCount > 0 && <span className="text-gray-600"> {"█ ".repeat(Math.min(5, hiddenCount))}</span>}
+                              </p>
+                              {/* Reveal progress bar */}
+                              <div className="mt-4 max-w-md mx-auto">
+                                <div className="flex justify-between text-xs mb-1">
+                                  <span className="text-gray-500">Clue Reveal</span>
+                                  <span className="text-purple-400 font-bold">{Math.round(game.imageChallenge.revealProgress)}%</span>
+                                </div>
+                                <div className="w-full bg-slate-800/60 rounded-full h-2">
+                                  <div className="h-full rounded-full bg-gradient-to-r from-purple-600 to-pink-500 transition-all duration-500"
+                                    style={{ width: `${game.imageChallenge.revealProgress}%` }} />
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })()}
+
+                        {/* Full reveal on end */}
+                        {game.imageChallenge.description && game.imageChallenge.status === "revealing" && (
+                          <p className="text-xl md:text-3xl lg:text-4xl font-bold text-white leading-relaxed animate-fade-in">
+                            {game.imageChallenge.description}
+                          </p>
+                        )}
+
+                        {game.imageChallenge.status === "active" && (
+                          <p className="text-base md:text-lg text-cyan-400 mt-6 animate-pulse font-semibold">
+                            💬 Type your answer in chat!
+                            {game.imageChallenge.revealProgress < 30 && " (Wait for more clues...)"}
+                          </p>
+                        )}
+
+                        {/* Speed bonus indicator */}
+                        {game.imageChallenge.status === "active" && game.imageChallenge.timeRemaining > 20 && (
+                          <div className="mt-3 text-sm text-yellow-400 font-bold animate-pulse">
+                            ⚡ SPEED BONUS ACTIVE — answer now for 2x points!
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Live Answer Feed */}
+                  {game.imageChallenge.answerFeed.length > 0 && (
+                    <div className="mt-2 glass-card rounded-lg px-3 py-2 max-h-20 overflow-hidden">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs text-gray-500 font-bold">LIVE ANSWERS</span>
+                        <span className="text-xs text-gray-600">({game.imageChallenge.answerFeed.length})</span>
+                      </div>
+                      {game.imageChallenge.answerFeed.slice(-4).map((a, i) => (
+                        <div key={i} className={`text-xs py-0.5 animate-slide-in-left ${a.correct ? "text-green-400 font-bold" : "text-gray-500"}`}>
+                          {a.correct ? "✅" : "❌"} <span className="font-bold">{a.displayName}:</span> {a.answer}
+                          {a.correct && ` (${a.time.toFixed(1)}s)`}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Reveal */}
+                  {game.imageChallenge.status === "revealing" && (
+                    <div className="mt-3 animate-bounce-in">
+                      <div className="bg-green-500/15 border-2 border-green-500/40 rounded-xl p-4 text-center">
+                        <p className="text-xl md:text-3xl font-black text-green-400">✅ {game.imageChallenge.correctAnswer}</p>
+                        {game.imageChallenge.winners.length > 0 ? (
+                          <div className="mt-2">
+                            <p className="text-lg text-yellow-300 font-bold">🏆 {game.imageChallenge.winners[0].displayName} ({game.imageChallenge.winners[0].time.toFixed(1)}s)</p>
+                            {game.imageChallenge.winnersCount > 1 && (
+                              <p className="text-sm text-gray-400">+{game.imageChallenge.winnersCount - 1} others correct</p>
+                            )}
+                          </div>
+                        ) : (
+                          <p className="text-lg text-gray-400 mt-1">Nobody got it!</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Live Answer Feed */}
+                  {game.imageChallenge.status === "active" && game.imageChallenge.answerFeed.length > 0 && (
+                    <div className="mt-2 max-h-20 overflow-hidden">
+                      {game.imageChallenge.answerFeed.slice(-3).map((a, i) => (
+                        <div key={i} className={`text-xs py-0.5 ${a.correct ? "text-green-400" : "text-gray-500"}`}>
+                          <span className="font-bold">{a.displayName}:</span> {a.answer} {a.correct && "✅"}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Mascot */}
+                <div className="mt-2 space-y-2 min-h-[50px]">
+                  {mascotMessages.map(msg => (
+                    <div key={msg.id} className="flex items-center gap-3 animate-slide-in-left">
+                      <div className="text-3xl animate-float shrink-0">🧙</div>
+                      <div className="glass-card neon-border-pink px-4 py-2 rounded-xl flex-1">
+                        <p className="text-sm md:text-lg font-semibold text-gray-200">{msg.text}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ═══ POWER SCALING BATTLE MODE (Arena Engine) ═══ */}
+            {arenaData && (arenaData.status === "voting" || arenaData.status === "event") && (
+              <div className="flex-1 flex flex-col min-h-0">
+                <div className="glass-card neon-border flex-1 flex flex-col p-4 md:p-6 animate-scale-in overflow-hidden">
+                  {/* Header */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="px-4 py-1.5 rounded-full font-black text-sm md:text-lg uppercase tracking-wider bg-orange-500/30 text-orange-300 border-2 border-orange-500/60" style={{ fontFamily: "Orbitron" }}>
+                        {arenaData.mode === "boss_raid" ? `👹 BOSS RAID: ${arenaData.bossName}` :
+                         arenaData.mode === "tug_of_war" ? "🔗 TUG OF WAR" : "⚔️ POWER SCALING"}
+                      </div>
+                      {arenaData.activeEvent?.active && (
+                        <div className="px-3 py-1 rounded-full bg-yellow-500/30 text-yellow-300 border border-yellow-500/50 text-xs font-bold animate-pulse">
+                          🎲 {arenaData.activeEvent.name}
+                        </div>
+                      )}
+                    </div>
+                    <div className={`flex items-center gap-2 px-4 py-2 rounded-full font-black ${
+                      arenaData.timeRemaining <= 5 ? "bg-red-500/30 text-red-300 border-2 border-red-500/60 animate-pulse" :
+                      "bg-slate-700/50 text-cyan-300 border-2 border-cyan-500/40"
+                    }`}>
+                      <span className="text-xl md:text-3xl" style={{ fontFamily: "Orbitron" }}>{arenaData.timeRemaining}</span>
+                      <span className="text-xs opacity-60">SEC</span>
+                    </div>
+                  </div>
+
+                  {/* Hype Meter */}
+                  {arenaData.hypeScore > 0 && (
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-xs text-gray-500">HYPE</span>
+                      <div className="flex-1 bg-slate-800/60 rounded-full h-2">
+                        <div className={`h-full rounded-full transition-all duration-300 ${
+                          arenaData.hypeLevel === "legendary" ? "bg-gradient-to-r from-red-500 to-yellow-400" :
+                          arenaData.hypeLevel === "blazing" ? "bg-gradient-to-r from-orange-500 to-red-400" :
+                          arenaData.hypeLevel === "hot" ? "bg-gradient-to-r from-yellow-500 to-orange-400" :
+                          "bg-gradient-to-r from-cyan-500 to-blue-400"
+                        }`} style={{ width: `${arenaData.hypeScore}%` }} />
+                      </div>
+                      <span className="text-xs font-bold text-orange-400">{arenaData.hypeLevel?.toUpperCase()}</span>
+                    </div>
+                  )}
+
+                  {/* Boss Raid HP Bar */}
+                  {arenaData.mode === "boss_raid" && (
+                    <div className="mb-4">
+                      <div className="flex justify-between text-sm mb-1">
+                        <span className="text-red-400 font-bold">👹 {arenaData.bossName}</span>
+                        <span className="text-gray-400">{arenaData.bossHp}/{arenaData.bossMaxHp} HP</span>
+                      </div>
+                      <div className="w-full bg-slate-800/60 rounded-full h-6 overflow-hidden">
+                        <div className={`h-full rounded-full transition-all duration-300 ${
+                          arenaData.bossPhase >= 4 ? "bg-gradient-to-r from-red-700 to-red-500 animate-pulse" :
+                          arenaData.bossPhase >= 3 ? "bg-gradient-to-r from-orange-600 to-red-500" :
+                          "bg-gradient-to-r from-green-600 to-yellow-500"
+                        }`} style={{ width: `${(arenaData.bossHp / arenaData.bossMaxHp) * 100}%` }} />
+                      </div>
+                      <div className="flex justify-between text-xs mt-1">
+                        <span className="text-yellow-400">Phase {arenaData.bossPhase}</span>
+                        <span className="text-cyan-400">Combo: {arenaData.comboCount}x | Damage: {arenaData.comboDamage}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Tug of War Bar */}
+                  {arenaData.mode === "tug_of_war" && arenaData.fighters?.length === 2 && (
+                    <div className="mb-4">
+                      <div className="flex justify-between text-sm mb-1">
+                        <span className="text-cyan-400 font-bold">{arenaData.fighters[0]?.name}</span>
+                        <span className="text-pink-400 font-bold">{arenaData.fighters[1]?.name}</span>
+                      </div>
+                      <div className="w-full bg-slate-800/60 rounded-full h-6 overflow-hidden relative">
+                        <div className="absolute inset-0 flex">
+                          <div className="bg-cyan-500/60 transition-all duration-500" style={{ width: `${50 + arenaData.tugPosition / 2}%` }} />
+                          <div className="bg-pink-500/60 flex-1" />
+                        </div>
+                        <div className="absolute inset-y-0 left-1/2 w-0.5 bg-white/50" />
+                      </div>
+                    </div>
+                  )}
+
+                  <p className="text-center text-gray-400 mb-3 text-sm">
+                    {arenaData.mode === "boss_raid" ? "Type anything in chat to ATTACK!" : "Total votes: "}
+                    <span className="text-white font-bold text-xl">{arenaData.totalVotes}</span>
+                    {arenaData.messagesPerSecond > 0 && <span className="text-gray-500 ml-2">({arenaData.messagesPerSecond} msg/s)</span>}
+                  </p>
+
+                  {/* Vote Bars (for standard and tug_of_war) */}
+                  {arenaData.mode !== "boss_raid" && (
+                  <div className="flex-1 flex flex-col gap-3 justify-center">
+                    {(arenaData.fighters || []).map((f: { label: string; name: string; anime: string; votes: number; percentage: number; attacks?: string[] }, i: number) => {
+                      const colors = ["bg-cyan-500", "bg-pink-500", "bg-amber-500", "bg-emerald-500", "bg-purple-500", "bg-red-500"];
+                      const borderColors = ["border-cyan-400", "border-pink-400", "border-amber-400", "border-emerald-400", "border-purple-400", "border-red-400"];
+                      const isLeader = (arenaData.fighters || []).every((o: { votes: number }) => f.votes >= o.votes) && f.votes > 0;
+                      return (
+                        <div key={f.label} className={`rounded-xl border-2 p-3 md:p-4 transition-all ${borderColors[i] || "border-gray-500"} ${isLeader ? "ring-2 ring-yellow-400/50" : ""} bg-slate-800/40`}>
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-3">
+                              <span className={`w-10 h-10 md:w-12 md:h-12 rounded-xl ${colors[i] || "bg-gray-500"} flex items-center justify-center font-black text-xl md:text-2xl text-white`}>
+                                {f.label}
+                              </span>
+                              <div>
+                                <p className="font-black text-white text-lg md:text-2xl">{f.name}</p>
+                                <p className="text-xs text-gray-500">{f.anime}</p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-black text-2xl md:text-3xl text-white">{f.percentage}%</p>
+                              <p className="text-xs text-gray-400">{f.votes} votes</p>
+                            </div>
+                          </div>
+                          <div className="w-full bg-slate-700/60 rounded-full h-4 md:h-5 overflow-hidden">
+                            <div className={`h-full rounded-full transition-all duration-500 ${colors[i] || "bg-gray-500"}`}
+                              style={{ width: `${f.percentage}%` }} />
+                          </div>
+                          <div className="flex justify-between items-center mt-1">
+                            {isLeader && <span className="text-xs text-yellow-400 font-bold">👑 LEADING</span>}
+                            {f.attacks && f.attacks.length > 0 && (
+                              <span className="text-xs text-orange-400 ml-auto">⚡ {f.attacks[f.attacks.length - 1]}</span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  )}
+
+                  {/* Attack Log */}
+                  {arenaData.attackLog && arenaData.attackLog.length > 0 && (
+                    <div className="mt-2 space-y-1">
+                      {arenaData.attackLog.map((a: { fighter: string; attack: string }, i: number) => (
+                        <div key={i} className="text-xs text-orange-400 animate-slide-in-left">⚡ {a.fighter}: {a.attack}</div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Results */}
+                  {arenaData.status === "results" && (
+                    <div className="mt-4 animate-bounce-in text-center">
+                      <div className="bg-yellow-500/15 border-2 border-yellow-500/40 rounded-xl p-4">
+                        {arenaData.mode === "boss_raid" ? (
+                          <p className="text-2xl md:text-3xl font-black text-green-300" style={{ fontFamily: "Orbitron" }}>
+                            {arenaData.bossHp <= 0 ? "🎉 BOSS DEFEATED!" : "💀 BOSS SURVIVES!"}
+                          </p>
+                        ) : (
+                          <p className="text-2xl md:text-3xl font-black text-yellow-300" style={{ fontFamily: "Orbitron" }}>
+                            👑 {[...(arenaData.fighters || [])].sort((a: { votes: number }, b: { votes: number }) => b.votes - a.votes)[0]?.name} WINS!
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Mascot */}
+                <div className="mt-2 space-y-2 min-h-[50px]">
+                  {mascotMessages.map(msg => (
+                    <div key={msg.id} className="flex items-center gap-3 animate-slide-in-left">
+                      <div className="text-3xl animate-float shrink-0">🧙</div>
+                      <div className="glass-card neon-border-pink px-4 py-2 rounded-xl flex-1">
+                        <p className="text-sm md:text-lg font-semibold text-gray-200">{msg.text}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ═══ QUIZ MODE (existing, unchanged) ═══ */}
+            {game.gameMode !== "image_guess" && !(arenaData && (arenaData.status === "voting" || arenaData.status === "event")) && (
             <div className="flex-1 flex flex-col min-h-0">
               {game.currentQuestion ? (
                 <div className="glass-card neon-border flex-1 flex flex-col p-4 md:p-6 lg:p-8 animate-scale-in overflow-hidden" key={game.currentQuestion.id}>
@@ -461,6 +838,7 @@ export default function OverlayPage() {
                 ))}
               </div>
             </div>
+            )}
 
             {/* Leaderboard (desktop) */}
             <div className="hidden lg:flex w-80 xl:w-96 flex-col gap-3">

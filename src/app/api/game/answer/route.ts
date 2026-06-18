@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getGameEngine } from "@/lib/game-engine";
+import { getArenaEngine } from "@/lib/arena-engine";
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,6 +12,7 @@ export async function POST(req: NextRequest) {
     }
 
     const engine = getGameEngine();
+    const arena = getArenaEngine();
 
     // Check for power-up commands
     const lowerMsg = message.toLowerCase().trim();
@@ -27,11 +29,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, correct: false, reason: "Power-up: steal activated" });
     }
 
-    const result = engine.processAnswer(
-      username,
-      displayName || username,
-      message
-    );
+    // Route to arena if arena is active
+    const arenaState = arena.getState();
+    if (arenaState.status === "voting" || arenaState.status === "event") {
+      const arenaResult = arena.processVote(username, displayName || username, message);
+      if (arenaResult.accepted) {
+        return NextResponse.json({ success: true, correct: true, reason: arenaResult.result });
+      }
+    }
+
+    // Otherwise route to game engine (quiz / image challenge)
+    const result = engine.processAnswer(username, displayName || username, message);
 
     return NextResponse.json({
       success: true,

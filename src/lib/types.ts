@@ -23,6 +23,7 @@ export interface Player {
   rank: number;
   title: string;
   lastAnswerTime: number;
+  voteCount: number;
 }
 
 export interface GameState {
@@ -103,4 +104,50 @@ export interface GameEvent {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any;
   timestamp: number;
+}
+
+// ═══════════════════════════════════════
+// NEW: Image Guess Mode Types
+// ═══════════════════════════════════════
+export interface ImageChallenge {
+  id: string;
+  mode: "guess_anime" | "guess_character_eyes" | "guess_character_body";
+  imageUrl: string;           // uploaded image path
+  revealImageUrl?: string;    // full reveal image (for eyes/body modes)
+  correctAnswer: string;
+  aliases: string[];          // accepted alternate spellings
+  difficulty: "easy" | "medium" | "hard" | "extreme";
+  revealType?: "eyes" | "hair" | "mouth" | "hand" | "weapon" | "outfit" | "symbol" | "aura" | "silhouette";
+  timeLimit: number;
+  pointValue: number;
+  description?: string;       // text clue for library-based challenges (no image)
+  category?: string;          // library category
+}
+
+// ═══════════════════════════════════════
+// NEW: Power Scaling Battle Types
+// ═══════════════════════════════════════
+export interface PowerScalingFighter {
+  label: string;       // A, B, C, etc.
+  name: string;
+  anime: string;
+  stats: {
+    power: number;
+    speed: number;
+    defense: number;
+    technique: number;
+    special: number;
+  };
+  votes: number;
+  voters: Set<string>;
+}
+
+export interface PowerScalingBattle {
+  id: string;
+  fighters: PowerScalingFighter[];
+  status: "voting" | "closed" | "results";
+  startTime: number;
+  timeLimit: number;
+  timeRemaining: number;
+  totalVotes: number;
 }
