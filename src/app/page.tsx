@@ -202,8 +202,9 @@ export default function AdminPage() {
     if (!imgUrl || !imgAnswer) return;
     gameAction("start_image_challenge", {
       imageUrl: imgUrl, correctAnswer: imgAnswer, aliases: imgAliases,
-      difficulty: imgDifficulty, mode: imgMode, revealType: imgRevealType,
+      difficulty: imgDifficulty, mode: "guess_anime", revealType: imgRevealType,
       revealImageUrl: imgRevealUrl || imgUrl, timeLimit: 30,
+      category: imgMode,
     });
   };
 

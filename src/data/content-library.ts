@@ -268,3 +268,51 @@ export function getCategoryEntries(category: GuessCategory, difficulty?: GuessDi
 export function getFranchises(): string[] {
   return [...new Set(LIBRARY.map(e => e.franchise))].sort();
 }
+
+// Generate A/B/C/D multiple choice options for a library entry
+export interface MCQuestion {
+  entry: LibraryEntry;
+  options: [string, string, string, string];
+  answer: "A" | "B" | "C" | "D";
+}
+
+export function getRandomMCQuestion(category: GuessCategory, difficulty?: GuessDifficulty, franchise?: string): MCQuestion | null {
+  const entry = getRandomEntry(category, difficulty, franchise);
+  if (!entry) return null;
+
+  // Get wrong answers from same category (different entries)
+  const sameCategory = LIBRARY.filter(e =>
+    e.category === entry.category && e.answer !== entry.answer
+  );
+
+  // Shuffle and pick 3 unique wrong answers
+  const shuffled = sameCategory.sort(() => Math.random() - 0.5);
+  const wrongAnswers: string[] = [];
+  const usedAnswers = new Set([entry.answer.toLowerCase()]);
+  for (const e of shuffled) {
+    if (!usedAnswers.has(e.answer.toLowerCase()) && wrongAnswers.length < 3) {
+      wrongAnswers.push(e.answer);
+      usedAnswers.add(e.answer.toLowerCase());
+    }
+  }
+
+  // Pad with generic wrong answers if not enough
+  const fallbacks = ["Unknown", "Not an anime", "Fictional"];
+  while (wrongAnswers.length < 3) {
+    wrongAnswers.push(fallbacks[wrongAnswers.length] || `Option ${wrongAnswers.length + 2}`);
+  }
+
+  // Shuffle correct answer into random position
+  const allOptions = [entry.answer, ...wrongAnswers];
+  const answerIndex = Math.floor(Math.random() * 4);
+  const correctAnswer = allOptions[0];
+  // Move correct answer to random position
+  allOptions.splice(0, 1);
+  allOptions.splice(answerIndex, 0, correctAnswer);
+
+  return {
+    entry,
+    options: allOptions as [string, string, string, string],
+    answer: (["A", "B", "C", "D"] as const)[answerIndex],
+  };
+}

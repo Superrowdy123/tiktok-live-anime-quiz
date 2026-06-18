@@ -44,6 +44,7 @@ interface GameData {
     answerFeed: { username: string; displayName: string; answer: string; correct: boolean; time: number }[];
     revealProgress: number; pointValue: number;
     description?: string | null; category?: string | null;
+    mcOptions?: string[] | null; mcAnswer?: string | null;
   } | null;
   powerBattle: {
     id: string; status: string; timeRemaining: number; totalVotes: number;
@@ -426,66 +427,72 @@ export default function OverlayPage() {
                         )}
                       </div>
                     ) : (
-                      /* Library mode: text clue with progressive reveal effect */
-                      <div className="text-center px-6 py-8 w-full relative">
-                        {/* Category icon */}
-                        <div className="text-6xl md:text-8xl mb-6 animate-float">
-                          {game.imageChallenge.category === "anime" ? "🎬" :
-                           game.imageChallenge.category === "character" ? "👤" :
-                           game.imageChallenge.category === "weapon" ? "⚔️" :
-                           game.imageChallenge.category === "symbol" ? "🔷" :
-                           game.imageChallenge.category === "eyes" ? "👁️" :
-                           game.imageChallenge.category === "hair" ? "💇" :
-                           game.imageChallenge.category === "silhouette" ? "🌑" :
-                           game.imageChallenge.category === "aura" ? "✨" :
-                           game.imageChallenge.category === "outfit" ? "👕" : "❓"}
-                        </div>
-
+                      /* Library mode: text clue + A/B/C/D options */
+                      <div className="flex flex-col px-4 md:px-6 py-4 w-full h-full">
                         {/* Description with progressive word reveal */}
-                        {game.imageChallenge.description && game.imageChallenge.status === "active" && (() => {
-                          const words = game.imageChallenge.description.split(" ");
+                        {game.imageChallenge.description && (() => {
+                          const desc = game.imageChallenge.description;
+                          if (game.imageChallenge.status === "revealing") {
+                            return <p className="text-xl md:text-2xl lg:text-3xl font-bold text-white text-center leading-relaxed mb-4 animate-fade-in">{desc}</p>;
+                          }
+                          const words = desc.split(" ");
                           const revealCount = Math.max(3, Math.ceil(words.length * (game.imageChallenge.revealProgress / 100)));
-                          const visibleWords = words.slice(0, revealCount);
-                          const hiddenCount = Math.max(0, words.length - revealCount);
+                          const visible = words.slice(0, revealCount).join(" ");
+                          const hidden = Math.max(0, words.length - revealCount);
                           return (
-                            <div>
-                              <p className="text-xl md:text-3xl lg:text-4xl font-bold text-white leading-relaxed">
-                                {visibleWords.join(" ")}
-                                {hiddenCount > 0 && <span className="text-gray-600"> {"█ ".repeat(Math.min(5, hiddenCount))}</span>}
-                              </p>
-                              {/* Reveal progress bar */}
-                              <div className="mt-4 max-w-md mx-auto">
-                                <div className="flex justify-between text-xs mb-1">
-                                  <span className="text-gray-500">Clue Reveal</span>
-                                  <span className="text-purple-400 font-bold">{Math.round(game.imageChallenge.revealProgress)}%</span>
-                                </div>
-                                <div className="w-full bg-slate-800/60 rounded-full h-2">
-                                  <div className="h-full rounded-full bg-gradient-to-r from-purple-600 to-pink-500 transition-all duration-500"
-                                    style={{ width: `${game.imageChallenge.revealProgress}%` }} />
-                                </div>
-                              </div>
-                            </div>
+                            <p className="text-lg md:text-2xl lg:text-3xl font-bold text-white text-center leading-relaxed mb-4">
+                              {visible}{hidden > 0 && <span className="text-gray-600"> {"█ ".repeat(Math.min(4, hidden))}</span>}
+                            </p>
                           );
                         })()}
 
-                        {/* Full reveal on end */}
-                        {game.imageChallenge.description && game.imageChallenge.status === "revealing" && (
-                          <p className="text-xl md:text-3xl lg:text-4xl font-bold text-white leading-relaxed animate-fade-in">
-                            {game.imageChallenge.description}
-                          </p>
+                        {/* A/B/C/D Options */}
+                        {game.imageChallenge.mcOptions && game.imageChallenge.mcOptions.length === 4 && (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3 flex-1 auto-rows-fr mt-2">
+                            {game.imageChallenge.mcOptions.map((opt, i) => {
+                              const letter = String.fromCharCode(65 + i);
+                              const colors = [
+                                { border: "border-cyan-500/50", bg: "bg-cyan-600", label: "bg-cyan-500" },
+                                { border: "border-pink-500/50", bg: "bg-pink-600", label: "bg-pink-500" },
+                                { border: "border-amber-500/50", bg: "bg-amber-600", label: "bg-amber-500" },
+                                { border: "border-emerald-500/50", bg: "bg-emerald-600", label: "bg-emerald-500" },
+                              ][i];
+                              const isCorrect = game.imageChallenge!.mcAnswer === letter;
+                              const isRevealing = game.imageChallenge!.status === "revealing";
+                              return (
+                                <div key={i} className={`flex items-center gap-3 p-3 md:p-4 rounded-xl border-2 transition-all ${
+                                  isRevealing && isCorrect ? "border-green-400 bg-green-500/30 shadow-[0_0_20px_rgba(34,197,94,0.3)]" :
+                                  isRevealing && !isCorrect ? "border-gray-700 bg-gray-800/50 opacity-40" :
+                                  `${colors.border} ${colors.bg}/15`
+                                }`}>
+                                  <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center font-black text-lg md:text-2xl text-white shrink-0 ${
+                                    isRevealing && isCorrect ? "bg-green-500" : isRevealing ? "bg-gray-700" : colors.label
+                                  }`}>{letter}</div>
+                                  <span className={`font-semibold text-base md:text-xl leading-tight ${
+                                    isRevealing && isCorrect ? "text-green-200" : isRevealing ? "text-gray-500" : "text-white"
+                                  }`}>{opt.replace(/^[A-D]\)\s*/, "")}</span>
+                                  {isRevealing && isCorrect && <span className="ml-auto text-2xl shrink-0">✅</span>}
+                                </div>
+                              );
+                            })}
+                          </div>
                         )}
 
+                        {/* Clue reveal progress + instructions */}
                         {game.imageChallenge.status === "active" && (
-                          <p className="text-base md:text-lg text-cyan-400 mt-6 animate-pulse font-semibold">
-                            💬 Type your answer in chat!
-                            {game.imageChallenge.revealProgress < 30 && " (Wait for more clues...)"}
-                          </p>
-                        )}
-
-                        {/* Speed bonus indicator */}
-                        {game.imageChallenge.status === "active" && game.imageChallenge.timeRemaining > 20 && (
-                          <div className="mt-3 text-sm text-yellow-400 font-bold animate-pulse">
-                            ⚡ SPEED BONUS ACTIVE — answer now for 2x points!
+                          <div className="mt-3 text-center">
+                            <div className="max-w-sm mx-auto mb-2">
+                              <div className="w-full bg-slate-800/60 rounded-full h-1.5">
+                                <div className="h-full rounded-full bg-gradient-to-r from-purple-600 to-pink-500 transition-all duration-500"
+                                  style={{ width: `${game.imageChallenge.revealProgress}%` }} />
+                              </div>
+                            </div>
+                            <p className="text-sm md:text-base text-cyan-400 font-semibold">
+                              💬 Type <span className="font-black text-pink-400">A B C D</span> in chat!
+                            </p>
+                            {game.imageChallenge.timeRemaining > 20 && (
+                              <p className="text-xs text-yellow-400 mt-1 animate-pulse">⚡ SPEED BONUS — answer now for 2x points!</p>
+                            )}
                           </div>
                         )}
                       </div>

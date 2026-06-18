@@ -70,6 +70,8 @@ export async function GET() {
         pointValue: imageChallenge.challenge.pointValue,
         description: imageChallenge.challenge.description || null,
         category: imageChallenge.challenge.category || null,
+        mcOptions: imageChallenge.challenge.mcOptions || null,
+        mcAnswer: imageChallenge.status === "revealing" ? (imageChallenge.challenge.mcAnswer || null) : null,
       } : null,
       // NEW: Power battle state
       powerBattle: powerBattle ? {
@@ -109,12 +111,13 @@ export async function POST(req: NextRequest) {
       // ─── NEW: Image Challenge ───
       case "start_image_challenge": {
         const { imageUrl, correctAnswer, aliases = [], difficulty = "medium", mode = "guess_anime",
-          revealType, revealImageUrl, timeLimit = 30 } = body;
+          revealType, revealImageUrl, timeLimit = 30, category } = body;
         engine.startImageChallenge({
           id: `img_${Date.now()}`, mode, imageUrl, revealImageUrl, correctAnswer,
           aliases: Array.isArray(aliases) ? aliases : aliases.split(",").map((s: string) => s.trim()),
           difficulty, revealType, timeLimit,
           pointValue: ({ easy: 15, medium: 25, hard: 40, extreme: 60 }[difficulty as string]) || 25,
+          category: category || undefined,
         });
         return NextResponse.json({ success: true });
       }

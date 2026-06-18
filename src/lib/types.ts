@@ -122,6 +122,8 @@ export interface ImageChallenge {
   pointValue: number;
   description?: string;       // text clue for library-based challenges (no image)
   category?: string;          // library category
+  mcOptions?: string[];       // A/B/C/D formatted options
+  mcAnswer?: "A" | "B" | "C" | "D"; // correct letter
 }
 
 // ═══════════════════════════════════════

@@ -1,6 +1,6 @@
 import type { Player, GameState, MascotMessage, PowerUpType, ImageChallenge, PowerScalingFighter, PowerScalingBattle } from "./types";
 import allQuestions, { getQuestionsForRound, getTotalRounds, type Question } from "@/data/questions";
-import { getRandomEntry, type GuessCategory, type GuessDifficulty } from "@/data/content-library";
+import { getRandomEntry, getRandomMCQuestion, type GuessCategory, type GuessDifficulty } from "@/data/content-library";
 
 const DIFFICULTY_POINTS: Record<string, number> = { easy: 10, medium: 20, hard: 30 };
 const IMAGE_POINTS: Record<string, number> = { easy: 15, medium: 25, hard: 40, extreme: 60 };
@@ -292,8 +292,9 @@ export class GameEngine {
   private autoQueueTimer: ReturnType<typeof setTimeout> | null = null;
 
   startLibraryChallenge(category: GuessCategory, difficulty?: GuessDifficulty, franchise?: string, autoQueue = false) {
-    const entry = getRandomEntry(category, difficulty, franchise);
-    if (!entry) return { success: false, error: "No entries found" };
+    const mcq = getRandomMCQuestion(category, difficulty, franchise);
+    if (!mcq) return { success: false, error: "No entries found" };
+    const { entry, options, answer } = mcq;
     this.autoQueueCategory = category;
     this.autoQueueDifficulty = difficulty;
     this.autoQueueEnabled = autoQueue;
@@ -304,8 +305,11 @@ export class GameEngine {
       difficulty: entry.difficulty, revealType: category as ImageChallenge["revealType"],
       timeLimit: 30, pointValue: IMAGE_POINTS[entry.difficulty] || 25,
       description: entry.description, category,
+      // A/B/C/D multiple choice options
+      mcOptions: options.map((o, i) => `${String.fromCharCode(65 + i)}) ${o}`),
+      mcAnswer: answer,
     });
-    return { success: true, entry: { id: entry.id, description: entry.description, category, difficulty: entry.difficulty, franchise: entry.franchise, hint: entry.hint } };
+    return { success: true, entry: { id: entry.id, description: entry.description, category, difficulty: entry.difficulty, franchise: entry.franchise, hint: entry.hint, options, answer } };
   }
 
   setAutoQueue(enabled: boolean) { this.autoQueueEnabled = enabled; }
@@ -426,8 +430,16 @@ export class GameEngine {
     player.totalAnswers++; this.state.stats.totalAnswers++;
 
     const ch = this.imageChallenge.challenge;
-    const allTargets = [ch.correctAnswer, ...ch.aliases];
-    const isCorrect = fuzzyMatch(message, allTargets);
+    // Check A/B/C/D if this is a multiple choice challenge
+    let isCorrect = false;
+    if (ch.mcAnswer) {
+      const cleaned = message.trim().toUpperCase();
+      isCorrect = cleaned === ch.mcAnswer;
+    } else {
+      // Free-text fuzzy match fallback
+      const allTargets = [ch.correctAnswer, ...ch.aliases];
+      isCorrect = fuzzyMatch(message, allTargets);
+    }
     const answerTime = (Date.now() - this.imageChallenge.startTime) / 1000;
 
     // Add to live feed
