@@ -1,0 +1,297 @@
+/* ============================================
+   OVERLAYS — Anime Wiz Live Arena
+   Dramatic, vivid, high-impact redesign
+   ============================================ */
+
+/* ── Backdrop ── */
+.backdrop {
+  background: rgba(4, 1, 20, 0.85);
+  backdrop-filter: blur(12px) saturate(1.5);
+  -webkit-backdrop-filter: blur(12px) saturate(1.5);
+  animation: backdropIn 250ms ease-out;
+}
+
+@keyframes backdropIn {
+  from { opacity: 0; backdrop-filter: blur(0px); }
+  to { opacity: 1; backdrop-filter: blur(12px); }
+}
+
+/* ── Main Overlay Panel ── */
+.overlayPanel {
+  background: linear-gradient(145deg, #1a0535 0%, #0f1535 50%, #0a1a30 100%);
+  border: 2px solid var(--color-primary);
+  box-shadow:
+    0 0 0 1px rgba(255,62,165,0.3),
+    0 0 60px rgba(255,62,165,0.3),
+    0 0 120px rgba(255,62,165,0.1),
+    0 40px 80px rgba(0,0,0,0.7),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+  animation: overlayEnter 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  border-radius: var(--radius-xl);
+}
+
+@keyframes overlayEnter {
+  from { opacity: 0; transform: scale(0.8) translateY(30px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ── Winner Popup ── */
+.winnerPopup {
+  animation: winnerBounce 600ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  pointer-events: none;
+  filter: drop-shadow(0 0 30px rgba(255,215,0,0.6));
+}
+
+@keyframes winnerBounce {
+  0% { transform: scale(0.2) translateY(40px); opacity: 0; }
+  50% { transform: scale(1.15) translateY(-10px); opacity: 1; }
+  70% { transform: scale(0.95) translateY(3px); }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.winnerName {
+  font-family: var(--font-display);
+  font-size: 3.5rem;
+  letter-spacing: 4px;
+  background: linear-gradient(135deg, #FFD700, #fff 50%, #FFD700);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 1.5s linear infinite;
+  filter: drop-shadow(0 0 20px rgba(255,215,0,0.8));
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ── Victory Screen ── */
+.victoryScreen {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255,215,0,0.2) 0%, transparent 60%),
+    radial-gradient(ellipse at 20% 100%, rgba(255,62,165,0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 100%, rgba(0,212,255,0.12) 0%, transparent 50%),
+    rgba(4, 1, 20, 0.9);
+}
+
+.victoryPanel {
+  border: 2px solid var(--color-accent);
+  box-shadow:
+    0 0 0 1px rgba(255,215,0,0.3),
+    0 0 60px rgba(255,215,0,0.3),
+    0 0 120px rgba(255,215,0,0.1),
+    0 40px 80px rgba(0,0,0,0.7),
+    inset 0 1px 0 rgba(255,215,0,0.15);
+  background: linear-gradient(145deg, #1a0d00 0%, #0f1535 50%, #001a2e 100%);
+  border-radius: var(--radius-xl);
+  animation: overlayEnter 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.victoryTitle {
+  font-family: var(--font-display);
+  font-size: 3rem;
+  letter-spacing: 6px;
+  background: linear-gradient(135deg, #FFD700, #fff, #FFD700);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 2s linear infinite;
+  filter: drop-shadow(0 0 25px rgba(255,215,0,0.7));
+}
+
+/* ── Score Reveal ── */
+.scoreReveal {
+  font-family: var(--font-display);
+  font-size: 5rem;
+  letter-spacing: 4px;
+  background: linear-gradient(135deg, #FFD700, #fff 40%, #FF3EA5 70%, #FFD700);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 1.5s linear infinite, scoreRevealIn 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  filter: drop-shadow(0 0 30px rgba(255,215,0,0.6));
+}
+
+@keyframes scoreRevealIn {
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ── Star Rating ── */
+.starRating {
+  color: var(--color-accent);
+  filter: drop-shadow(0 0 8px rgba(255,215,0,0.8));
+  font-size: 2.5rem;
+  animation: starsIn 500ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes starsIn {
+  0% { transform: scale(0); opacity: 0; }
+  70% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ── Paused Overlay ── */
+.pausedOverlay {
+  background:
+    radial-gradient(ellipse at 50% 50%, rgba(255,215,0,0.08) 0%, transparent 70%),
+    rgba(4, 1, 20, 0.7);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.pausedText {
+  font-family: var(--font-display);
+  font-size: 5rem;
+  letter-spacing: 8px;
+  background: linear-gradient(135deg, #FFD700, #fff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 30px rgba(255,215,0,0.7));
+  animation: pausedPulse 2s ease-in-out infinite;
+}
+
+@keyframes pausedPulse {
+  0%,100% { filter: drop-shadow(0 0 30px rgba(255,215,0,0.7)); }
+  50% { filter: drop-shadow(0 0 60px rgba(255,215,0,1)); }
+}
+
+/* ── Screen Flash Effects ── */
+.screenFlash { pointer-events: none; transition: opacity 150ms ease-out; }
+
+.correctFlash {
+  animation: correctFlashAnim 600ms ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes correctFlashAnim {
+  0% { background: rgba(34, 197, 94, 0.5); }
+  30% { background: rgba(34, 197, 94, 0.3); }
+  100% { background: transparent; }
+}
+
+.wrongFlash {
+  animation: wrongFlashAnim 600ms ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes wrongFlashAnim {
+  0% { background: rgba(255, 68, 68, 0.5); }
+  30% { background: rgba(255, 68, 68, 0.25); }
+  100% { background: transparent; }
+}
+
+/* ── Center Pop Text (CORRECT! / WRONG!) ── */
+.centerText {
+  font-family: var(--font-display);
+  font-size: 6rem;
+  letter-spacing: 6px;
+  animation: popInOut 1.6s ease-out forwards;
+  text-shadow:
+    0 0 30px currentColor,
+    0 0 60px currentColor;
+}
+
+@keyframes popInOut {
+  0% { transform: scale(0.3) rotate(-5deg); opacity: 0; }
+  25% { transform: scale(1.3) rotate(2deg); opacity: 1; }
+  50% { transform: scale(1) rotate(0deg); opacity: 1; }
+  80% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(0.8); opacity: 0; }
+}
+
+/* ── Confetti ── */
+.confettiParticle {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  z-index: 200;
+  pointer-events: none;
+}
+
+/* ── Floating Score Text ── */
+.floatingText {
+  font-family: var(--font-display);
+  pointer-events: none;
+  z-index: 50;
+  animation: floatUp 1s ease-out forwards;
+  text-shadow: 0 0 15px currentColor;
+}
+
+@keyframes floatUp {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  60% { opacity: 1; transform: translateY(-50px) scale(1.2); }
+  100% { opacity: 0; transform: translateY(-100px) scale(0.9); }
+}
+
+/* ── Round Transition ── */
+.roundTransition {
+  animation: overlayEnter 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ── Play Again Button ── */
+.playAgainBtn {
+  background: linear-gradient(135deg, #FF3EA5, #a855f7, #00D4FF);
+  background-size: 200% 200%;
+  color: #fff;
+  font-weight: 900;
+  font-size: 1.2rem;
+  padding: 16px 48px;
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  font-family: var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  box-shadow:
+    0 0 30px rgba(255,62,165,0.5),
+    0 0 60px rgba(168,85,247,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.2);
+  transition: all 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: btnGradient 3s ease infinite;
+}
+
+@keyframes btnGradient {
+  0%,100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.playAgainBtn:hover {
+  transform: scale(1.07) translateY(-3px);
+  box-shadow:
+    0 0 50px rgba(255,62,165,0.7),
+    0 0 100px rgba(168,85,247,0.3),
+    inset 0 1px 0 rgba(255,255,255,0.3);
+}
+
+/* ── Sound Toggle ── */
+.soundToggle {
+  transition: all 200ms ease-out;
+}
+.soundToggle:hover {
+  transform: scale(1.15);
+  filter: drop-shadow(0 0 8px rgba(255,62,165,0.6));
+}
+
+/* ── Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .overlayPanel { animation: none; }
+  .winnerPopup { animation: none; }
+  .winnerName { animation: none; -webkit-text-fill-color: var(--color-accent); }
+  .scoreReveal { animation: none; -webkit-text-fill-color: var(--color-accent); }
+  .victoryTitle { animation: none; -webkit-text-fill-color: var(--color-accent); }
+  .centerText { animation: none; opacity: 1; }
+  .playAgainBtn:hover { transform: none; }
+  .playAgainBtn { animation: none; }
+  .backdrop { animation: none; }
+  .pausedText { animation: none; }
+  .floatingText { animation: none; }
+  .titleDisplay { animation: none; -webkit-text-fill-color: var(--color-primary); }
+}

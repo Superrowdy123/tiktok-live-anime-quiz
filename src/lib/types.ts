@@ -107,26 +107,6 @@ export interface GameEvent {
 }
 
 // ═══════════════════════════════════════
-// NEW: Image Guess Mode Types
-// ═══════════════════════════════════════
-export interface ImageChallenge {
-  id: string;
-  mode: "guess_anime" | "guess_character_eyes" | "guess_character_body";
-  imageUrl: string;           // uploaded image path
-  revealImageUrl?: string;    // full reveal image (for eyes/body modes)
-  correctAnswer: string;
-  aliases: string[];          // accepted alternate spellings
-  difficulty: "easy" | "medium" | "hard" | "extreme";
-  revealType?: "eyes" | "hair" | "mouth" | "hand" | "weapon" | "outfit" | "symbol" | "aura" | "silhouette";
-  timeLimit: number;
-  pointValue: number;
-  description?: string;       // text clue for library-based challenges (no image)
-  category?: string;          // library category
-  mcOptions?: string[];       // A/B/C/D formatted options
-  mcAnswer?: "A" | "B" | "C" | "D"; // correct letter
-}
-
-// ═══════════════════════════════════════
 // NEW: Power Scaling Battle Types
 // ═══════════════════════════════════════
 export interface PowerScalingFighter {

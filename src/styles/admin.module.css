@@ -1,0 +1,572 @@
+/* ============================================
+   ADMIN PANEL — Anime Wiz Live Arena
+   Vivid, high-contrast, themed redesign
+   ============================================ */
+
+/* ── Admin Header ── */
+.adminHeader {
+  background: linear-gradient(135deg, #130026 0%, #0a1628 100%);
+  border-bottom: 2px solid transparent;
+  border-image: linear-gradient(90deg, #FF3EA5, #a855f7, #00D4FF) 1;
+  box-shadow:
+    0 0 30px rgba(255,62,165,0.2),
+    0 4px 20px rgba(0,0,0,0.5);
+  position: relative;
+}
+
+.adminHeader::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #FF3EA5, #a855f7, #00D4FF, transparent);
+  animation: headerLineFlow 3s linear infinite;
+  background-size: 200% 100%;
+}
+
+@keyframes headerLineFlow {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ── Admin Cards ── */
+.adminCard {
+  background: linear-gradient(145deg, rgba(26,10,46,0.9) 0%, rgba(15,21,53,0.95) 100%);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius-md);
+  box-shadow:
+    0 4px 24px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+  transition: all 250ms ease;
+  backdrop-filter: blur(4px);
+}
+
+.adminCard:hover {
+  border-color: rgba(255,62,165,0.4);
+  box-shadow:
+    0 0 0 1px rgba(255,62,165,0.2),
+    0 0 25px rgba(255,62,165,0.15),
+    0 8px 32px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.07);
+  transform: translateY(-2px);
+}
+
+/* ── Card Top Accents ── */
+.cardHighlight {
+  border-top: 3px solid var(--color-primary);
+  box-shadow: 0 -2px 15px rgba(255,62,165,0.3) !important;
+}
+
+.cardHighlightCyan {
+  border-top: 3px solid var(--color-secondary);
+  box-shadow: 0 -2px 15px rgba(0,212,255,0.3) !important;
+}
+
+.cardHighlightGold {
+  border-top: 3px solid var(--color-accent);
+  box-shadow: 0 -2px 15px rgba(255,215,0,0.3) !important;
+}
+
+/* ── Admin Tabs ── */
+.adminTab {
+  position: relative;
+  font-family: var(--font-body);
+  font-weight: 700;
+  padding: 9px 18px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.adminTabActive {
+  background: linear-gradient(135deg, var(--color-primary), #a855f7);
+  color: #fff;
+  border-color: transparent;
+  box-shadow:
+    0 0 20px rgba(255,62,165,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.2);
+}
+
+.adminTabActive:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 30px rgba(255,62,165,0.7), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+
+.adminTabInactive {
+  background: rgba(255,255,255,0.04);
+  color: var(--color-text-secondary);
+  border-color: rgba(255,255,255,0.06);
+}
+
+.adminTabInactive:hover {
+  background: rgba(0,212,255,0.1);
+  color: var(--color-secondary);
+  border-color: rgba(0,212,255,0.3);
+  box-shadow: 0 0 15px rgba(0,212,255,0.15);
+}
+
+/* ── Sidebar ── */
+.sidebarNav {
+  background: linear-gradient(180deg, #0d0418 0%, #0a0d1a 100%);
+  min-width: 200px;
+  border-right: 1px solid rgba(255,62,165,0.15);
+  box-shadow: 4px 0 20px rgba(0,0,0,0.3);
+}
+
+.sidebarItem {
+  padding: 12px 18px;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  border-left: 3px solid transparent;
+  cursor: pointer;
+  transition: all 180ms ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+}
+
+.sidebarItem::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(0,212,255,0.04));
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.sidebarItem:hover {
+  background: rgba(0,212,255,0.07);
+  color: var(--color-secondary);
+  border-left-color: rgba(0,212,255,0.4);
+}
+
+.sidebarItem:hover::before { opacity: 1; }
+
+.sidebarItemActive {
+  border-left-color: var(--color-primary) !important;
+  color: var(--color-primary) !important;
+  background: rgba(255,62,165,0.1) !important;
+  box-shadow: inset 3px 0 10px rgba(255,62,165,0.1);
+  text-shadow: 0 0 10px rgba(255,62,165,0.4);
+}
+
+/* ── Stat Cards ── */
+.statCard {
+  background: linear-gradient(145deg, rgba(26,10,46,0.9), rgba(15,21,53,0.95));
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  transition: all 220ms ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.statCard::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.statCard:hover {
+  border-color: rgba(255,62,165,0.35);
+  box-shadow:
+    0 0 25px rgba(255,62,165,0.15),
+    0 8px 30px rgba(0,0,0,0.4);
+  transform: translateY(-3px);
+}
+
+.statCard:hover::before { opacity: 1; }
+
+.statNumber {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  line-height: 1;
+  letter-spacing: 2px;
+  background: linear-gradient(135deg, #fff, var(--color-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.statLabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-top: 4px;
+}
+
+/* ── Data Table ── */
+.dataTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.dataTable thead th {
+  background: linear-gradient(135deg, rgba(13,4,30,0.9), rgba(10,13,26,0.95));
+  color: var(--color-secondary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid rgba(0,212,255,0.2);
+  text-shadow: 0 0 8px rgba(0,212,255,0.4);
+}
+
+.dataTable tbody td {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.dataTable tbody tr {
+  transition: background 150ms ease;
+}
+
+.dataTable tbody tr:nth-child(odd) {
+  background: rgba(255,255,255,0.02);
+}
+
+.dataTable tbody tr:hover {
+  background: rgba(255,62,165,0.08);
+}
+
+.dataTable tbody tr:hover td {
+  color: var(--color-text-primary);
+}
+
+/* ── Form Fields ── */
+.formField { margin-bottom: 18px; }
+
+.formLabel {
+  display: block;
+  font-size: 11px;
+  color: var(--color-secondary);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  text-shadow: 0 0 6px rgba(0,212,255,0.3);
+}
+
+.formInput {
+  width: 100%;
+  background: rgba(10,10,26,0.8);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--color-text-primary);
+  padding: 11px 16px;
+  border-radius: var(--radius-sm);
+  outline: none;
+  font-size: 13px;
+  font-family: var(--font-body);
+  transition: all 200ms ease;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.formInput:focus {
+  border-color: var(--color-primary);
+  box-shadow:
+    0 0 0 3px rgba(255,62,165,0.15),
+    inset 0 2px 6px rgba(0,0,0,0.3);
+  background: rgba(15,5,35,0.9);
+}
+
+.formInput::placeholder { color: rgba(255,255,255,0.2); }
+
+/* ── Buttons ── */
+.primaryBtn {
+  background: linear-gradient(135deg, var(--color-primary), #a855f7);
+  color: #fff;
+  font-weight: 800;
+  font-size: 12px;
+  padding: 11px 28px;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-family: var(--font-body);
+  transition: all 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow:
+    0 0 20px rgba(255,62,165,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.2);
+}
+
+.primaryBtn:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 0 35px rgba(255,62,165,0.6),
+    0 8px 20px rgba(0,0,0,0.3),
+    inset 0 1px 0 rgba(255,255,255,0.2);
+}
+
+.secondaryBtn {
+  background: rgba(0,212,255,0.08);
+  color: var(--color-secondary);
+  font-weight: 700;
+  font-size: 12px;
+  padding: 11px 28px;
+  border: 1px solid rgba(0,212,255,0.4);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-family: var(--font-body);
+  transition: all 200ms ease;
+}
+
+.secondaryBtn:hover {
+  background: rgba(0,212,255,0.15);
+  border-color: var(--color-secondary);
+  box-shadow: 0 0 20px rgba(0,212,255,0.3);
+  transform: translateY(-1px);
+}
+
+.dangerBtn {
+  background: linear-gradient(135deg, #FF4444, #cc0000);
+  color: #fff;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 11px 28px;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-family: var(--font-body);
+  transition: all 200ms ease;
+  box-shadow: 0 0 15px rgba(255,68,68,0.3);
+}
+
+.dangerBtn:hover {
+  box-shadow: 0 0 30px rgba(255,68,68,0.5);
+  transform: translateY(-2px);
+}
+
+/* ── Event Log ── */
+.eventLog {
+  background: rgba(5,5,15,0.9);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  border: 1px solid rgba(0,212,255,0.1);
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.4);
+}
+
+.eventLogItem {
+  padding: 7px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  transition: background 150ms ease;
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.eventLogItem:hover { background: rgba(255,62,165,0.06); }
+
+.eventTime {
+  color: rgba(255,255,255,0.2);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  flex-shrink: 0;
+}
+
+.eventType {
+  color: var(--color-primary);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-shadow: 0 0 6px rgba(255,62,165,0.5);
+  flex-shrink: 0;
+}
+
+.eventData {
+  color: var(--color-text-muted);
+  font-size: 11px;
+}
+
+/* ── Battle Cards ── */
+.battleCard {
+  background: linear-gradient(145deg, rgba(26,10,46,0.85), rgba(15,21,53,0.9));
+  border: 1px solid rgba(255,255,255,0.06);
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  transition: all 200ms ease;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.battleCard:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    0 4px 20px rgba(0,0,0,0.3);
+  transform: translateX(3px);
+}
+
+.battleCardCyan { border-left-color: var(--color-secondary); }
+.battleCardGold { border-left-color: var(--color-accent); }
+.battleCardOrange { border-left-color: #f97316; }
+.battleCardPurple { border-left-color: #a855f7; }
+
+/* ── Status Badges ── */
+.statusBadge {
+  padding: 3px 12px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-family: var(--font-mono);
+}
+
+.statusBadgeLive {
+  background: rgba(34,197,94,0.15);
+  color: #22c55e;
+  border: 1px solid rgba(34,197,94,0.5);
+  box-shadow: 0 0 12px rgba(34,197,94,0.3);
+  animation: livePulse 2s ease-in-out infinite;
+  text-shadow: 0 0 8px rgba(34,197,94,0.6);
+}
+
+@keyframes livePulse {
+  0%,100% { box-shadow: 0 0 12px rgba(34,197,94,0.3); }
+  50% { box-shadow: 0 0 25px rgba(34,197,94,0.6); }
+}
+
+.statusBadgePaused {
+  background: rgba(234,179,8,0.15);
+  color: #eab308;
+  border: 1px solid rgba(234,179,8,0.4);
+  box-shadow: 0 0 8px rgba(234,179,8,0.2);
+}
+
+.statusBadgeOffline {
+  background: rgba(107,114,128,0.1);
+  color: #6b7280;
+  border: 1px solid rgba(107,114,128,0.25);
+}
+
+/* ── Section Title ── */
+.sectionTitle {
+  font-family: var(--font-body);
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--color-text-primary);
+  position: relative;
+}
+
+/* ── Upload Zone ── */
+.uploadZone {
+  border: 2px dashed rgba(255,255,255,0.12);
+  border-radius: var(--radius-lg);
+  transition: all 220ms ease;
+  cursor: pointer;
+  background: rgba(255,255,255,0.02);
+  position: relative;
+  overflow: hidden;
+}
+
+.uploadZone::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,62,165,0.05), rgba(168,85,247,0.03));
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.uploadZone:hover {
+  border-color: var(--color-primary);
+  background: rgba(255,62,165,0.04);
+  box-shadow: 0 0 20px rgba(255,62,165,0.1);
+}
+
+.uploadZone:hover::before { opacity: 1; }
+
+/* ── Answer Rows ── */
+.answerRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.02);
+  transition: all 200ms ease;
+}
+
+.answerRow:hover {
+  border-color: rgba(255,62,165,0.25);
+  background: rgba(255,62,165,0.05);
+}
+
+.answerRowCorrect {
+  border-color: rgba(34,197,94,0.5) !important;
+  background: rgba(34,197,94,0.1) !important;
+  box-shadow: 0 0 15px rgba(34,197,94,0.15);
+}
+
+/* ── Library Items ── */
+.libraryItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255,255,255,0.05);
+  background: rgba(255,255,255,0.02);
+  transition: all 200ms ease;
+  cursor: pointer;
+}
+
+.libraryItem:hover {
+  border-color: rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04);
+}
+
+.libraryItemSelected {
+  border-color: var(--color-primary) !important;
+  background: rgba(255,62,165,0.1) !important;
+  box-shadow: 0 0 15px rgba(255,62,165,0.2);
+}
+
+/* ── Filter Label ── */
+.filterLabel {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  display: block;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-family: var(--font-mono);
+}
+
+/* ── Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .adminCard:hover { transform: none; }
+  .statCard:hover { transform: none; }
+  .primaryBtn:hover { transform: none; }
+  .dangerBtn:hover { transform: none; }
+  .secondaryBtn:hover { transform: none; }
+  .battleCard:hover { transform: none; }
+  .sidebarItem { transition: none; }
+  .statusBadgeLive { animation: none; }
+  .adminHeader::after { animation: none; }
+}

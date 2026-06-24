@@ -32,7 +32,6 @@ export async function GET() {
   try {
     const engine = getGameEngine();
     const state = engine.getPublicState();
-    const imageChallenge = engine.getImageChallenge();
     const powerBattle = engine.getPowerBattle();
 
     return NextResponse.json({
@@ -54,25 +53,6 @@ export async function GET() {
       stats: state.stats, sessionId: state.sessionId,
       currentRound: engine.getCurrentRound(), totalRounds: engine.getTotalRounds(),
       answerDistribution: engine.getAnswerDistribution(), correctAnswerers: engine.getCorrectAnswerers(),
-      // NEW: Image challenge state
-      imageChallenge: imageChallenge ? {
-        mode: imageChallenge.challenge.mode, status: imageChallenge.status,
-        imageUrl: imageChallenge.challenge.imageUrl,
-        revealImageUrl: imageChallenge.challenge.revealImageUrl,
-        difficulty: imageChallenge.challenge.difficulty,
-        revealType: imageChallenge.challenge.revealType,
-        timeRemaining: imageChallenge.timeRemaining,
-        correctAnswer: imageChallenge.status === "revealing" ? imageChallenge.challenge.correctAnswer : null,
-        winnersCount: imageChallenge.winners.length,
-        winners: imageChallenge.winners.slice(0, 5),
-        answerFeed: imageChallenge.answerFeed.slice(-10),
-        revealProgress: imageChallenge.revealProgress,
-        pointValue: imageChallenge.challenge.pointValue,
-        description: imageChallenge.challenge.description || null,
-        category: imageChallenge.challenge.category || null,
-        mcOptions: imageChallenge.challenge.mcOptions || null,
-        mcAnswer: imageChallenge.status === "revealing" ? (imageChallenge.challenge.mcAnswer || null) : null,
-      } : null,
       // NEW: Power battle state
       powerBattle: powerBattle ? {
         id: powerBattle.id, status: powerBattle.status, timeRemaining: powerBattle.timeRemaining,
@@ -108,21 +88,6 @@ export async function POST(req: NextRequest) {
       case "reset": { engine.resetGame(); return NextResponse.json({ success: true }); }
       case "end": { engine.endGame(); await saveToDatabase("end", engine); return NextResponse.json({ success: true, winners: engine.getWinners() }); }
 
-      // ─── NEW: Image Challenge ───
-      case "start_image_challenge": {
-        const { imageUrl, correctAnswer, aliases = [], difficulty = "medium", mode = "guess_anime",
-          revealType, revealImageUrl, timeLimit = 30, category } = body;
-        engine.startImageChallenge({
-          id: `img_${Date.now()}`, mode, imageUrl, revealImageUrl, correctAnswer,
-          aliases: Array.isArray(aliases) ? aliases : aliases.split(",").map((s: string) => s.trim()),
-          difficulty, revealType, timeLimit,
-          pointValue: ({ easy: 15, medium: 25, hard: 40, extreme: 60 }[difficulty as string]) || 25,
-          category: category || undefined,
-        });
-        return NextResponse.json({ success: true });
-      }
-      case "reveal_image_answer": { engine.revealImageAnswer(); return NextResponse.json({ success: true }); }
-
       // ─── NEW: Power Scaling Battle ───
       case "start_power_battle": {
         const { fighters, timeLimit = 30 } = body;
@@ -131,17 +96,6 @@ export async function POST(req: NextRequest) {
       }
       case "close_power_battle": { engine.closePowerBattle(); return NextResponse.json({ success: true }); }
       case "reset_votes": { engine.resetVotes(); return NextResponse.json({ success: true }); }
-
-      // ─── Library-based auto challenge with progressive reveal ───
-      case "start_library_challenge": {
-        const { category = "anime", difficulty, franchise, autoQueue = false, timeLimit } = body;
-        const result = engine.startLibraryChallenge(category, difficulty, franchise, autoQueue, timeLimit);
-        return NextResponse.json(result);
-      }
-      case "set_auto_queue": {
-        engine.setAutoQueue(body.enabled ?? false);
-        return NextResponse.json({ success: true });
-      }
 
       default: return NextResponse.json({ error: "Unknown action" }, { status: 400 });
     }
