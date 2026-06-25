@@ -403,7 +403,7 @@ export default function OverlayPage() {
       {/* Sound Toggle */}
       <button
         onClick={() => { initAudio(); setAudioReady(true); setSoundEnabled(s => !s); }}
-        className={`absolute top-3 right-3 z-50 text-white rounded-full flex items-center justify-center border-2 transition-all ${overlayStyles.soundToggle} ${
+        className={`absolute top-3 left-3 z-50 text-white rounded-full flex items-center justify-center border-2 transition-all ${overlayStyles.soundToggle} ${
           m ? "w-12 h-12 text-xl" : "w-12 h-12 md:w-14 md:h-14 text-2xl md:text-3xl"
         } ${
           soundEnabled && audioReady
@@ -417,7 +417,7 @@ export default function OverlayPage() {
 
       {/* Click to enable audio */}
       {!audioReady && game?.status !== "waiting" && (
-        <div className="absolute top-14 right-3 z-50 animate-bounce-in">
+        <div className="absolute top-14 left-3 z-50 animate-bounce-in">
           <button
             onClick={() => { initAudio(); setAudioReady(true); }}
             className="glass-card neon-border-pink px-4 py-2 rounded-xl text-sm text-pink-300 hover:text-white transition-all animate-pulse"
