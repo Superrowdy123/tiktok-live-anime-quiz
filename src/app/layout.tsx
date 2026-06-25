@@ -16,7 +16,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           rel="stylesheet"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;600;700;800;900&family=Space+Mono&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Bangers&family=Nunito:wght@400;600;700;800;900&family=Space+Mono&display=swap"
           rel="stylesheet"
         />
       </head>
