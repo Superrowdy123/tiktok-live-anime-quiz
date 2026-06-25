@@ -81,7 +81,47 @@ export const CHARACTERS: AnimeCharacter[] = [
  {name:"Rimuru Tempest",anime:"Slime Isekai",tier:"S",power:96,tags:["magic","intelligence","strength"]},
  {name:"Ainz Ooal Gown",anime:"Overlord",tier:"S",power:93,tags:["magic","intelligence","villain"]},
  {name:"Spike Spiegel",anime:"Cowboy Bebop",tier:"B",power:60,tags:["martial arts","intelligence"]},
- {name:"Edward Elric",anime:"FMA",tier:"A",power:75,tags:["intelligence","martial arts","magic"]},
+  {name:"Edward Elric",anime:"FMA",tier:"A",power:75,tags:["intelligence","martial arts","magic"]},
+  // JJK additions
+  {name:"Yuta Okkotsu",anime:"Jujutsu Kaisen",tier:"S",power:92,tags:["magic","sword","curse"]},
+  {name:"Hakari Kinji",anime:"Jujutsu Kaisen",tier:"A",power:85,tags:["magic","endurance","luck"]},
+  // Demon Slayer additions
+  {name:"Kyojuro Rengoku",anime:"Demon Slayer",tier:"A",power:83,tags:["sword","speed","fire"]},
+  {name:"Shinobu Kocho",anime:"Demon Slayer",tier:"B",power:72,tags:["sword","speed","poison"]},
+  // One Piece additions
+  {name:"Akainu",anime:"One Piece",tier:"S",power:94,tags:["strength","villain","magma"]},
+  {name:"Aokiji",anime:"One Piece",tier:"A",power:90,tags:["strength","ice","speed"]},
+  {name:"Mihawk",anime:"One Piece",tier:"S",power:95,tags:["sword","strength","speed"]},
+  // Naruto additions
+  {name:"Obito Uchiha",anime:"Naruto",tier:"S",power:91,tags:["strength","villain","kamui"]},
+  {name:"Hashirama Senju",anime:"Naruto",tier:"S",power:95,tags:["strength","regeneration","sage"]},
+  // Recent hits
+  {name:"Sung Jinwoo",anime:"Solo Leveling",tier:"S",power:97,tags:["strength","speed","shadow"]},
+  {name:"Frieren",anime:"Frieren: Beyond Journey's End",tier:"A",power:85,tags:["magic","intelligence","mage"]},
+  {name:"Denji",anime:"Chainsaw Man",tier:"A",power:80,tags:["strength","speed","chainsaw"]},
+  {name:"Power",anime:"Chainsaw Man",tier:"B",power:68,tags:["strength","blood","devil"]},
+  {name:"Aki Hayakawa",anime:"Chainsaw Man",tier:"B",power:65,tags:["sword","curse","intelligence"]},
+  {name:"Makima",anime:"Chainsaw Man",tier:"S",power:88,tags:["intelligence","villain","control"]},
+  {name:"Reze",anime:"Chainsaw Man",tier:"B",power:70,tags:["strength","bomb","speed"]},
+  // Other series
+  {name:"Vash the Stampede",anime:"Trigun",tier:"B",power:70,tags:["speed","gunman","pacifist"]},
+  {name:"Kazuma Satou",anime:"Konosuba",tier:"C",power:45,tags:["intelligence","strategy","luck"]},
+  {name:"Megumin",anime:"Konosuba",tier:"C",power:50,tags:["magic","explosion","glass cannon"]},
+  {name:"Aqua (Konosuba)",anime:"Konosuba",tier:"D",power:35,tags:["magic","healing","useless"]},
+  {name:"Darkness",anime:"Konosuba",tier:"C",power:55,tags:["strength","endurance","tank"]},
+  {name:"Subaru Natsuki",anime:"Re:Zero",tier:"D",power:30,tags:["intelligence","endurance","return by death"]},
+  {name:"Reinhard van Astrea",anime:"Re:Zero",tier:"S",power:98,tags:["strength","speed","sword","blessed"]},
+  {name:"Emilia",anime:"Re:Zero",tier:"A",power:75,tags:["magic","ice","half-elf"]},
+  {name:"Roswaal L Mathers",anime:"Re:Zero",tier:"A",power:88,tags:["magic","intelligence"]},
+  {name:"Bocchi (Hitori Gotoh)",anime:"Bocchi the Rock",tier:"D",power:10,tags:["music","anxiety"]},
+  {name:"Kaguya Shinomiya",anime:"Kaguya-sama",tier:"D",power:15,tags:["intelligence","strategy"]},
+  {name:"Miyuki Shirogane",anime:"Kaguya-sama",tier:"D",power:18,tags:["intelligence","hard work"]},
+  {name:"Koro-sensei",anime:"Assassination Classroom",tier:"A",power:89,tags:["speed","strength","intelligence"]},
+  {name:"Alucard",anime:"Hellsing Ultimate",tier:"S",power:96,tags:["strength","speed","vampire","immortal"]},
+  {name:"Yujiro Hanma",anime:"Baki",tier:"S",power:97,tags:["strength","martial arts","villain"]},
+  {name:"Baki Hanma",anime:"Baki",tier:"A",power:85,tags:["strength","martial arts","speed"]},
+  {name:"Yusuke Urameshi",anime:"Yu Yu Hakusho",tier:"A",power:83,tags:["strength","speed","spirit"]},
+  {name:"Sensui",anime:"Yu Yu Hakusho",tier:"A",power:88,tags:["strength","villain","psychic"]},
 ];
 
 // Hot Takes Database 

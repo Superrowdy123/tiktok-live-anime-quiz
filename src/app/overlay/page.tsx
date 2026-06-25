@@ -367,6 +367,7 @@ export default function OverlayPage() {
     ? game.answerDistribution.A + game.answerDistribution.B + game.answerDistribution.C + game.answerDistribution.D
     : 0;
 
+  const isQuizMode = !!game?.currentQuestion && !imageQuizSession?.question && !(arenaData && (arenaData.status === "voting" || arenaData.status === "event"));
   const m = isMobile || isPhoneFrame;
 
   // ─── OVERLAY CONTENT ───
@@ -443,6 +444,132 @@ export default function OverlayPage() {
         />
       ))}
 
+      {/* STREAM QUIZ CARD — TikTok Live optimized */}
+      {isQuizMode && game?.currentQuestion && (
+        <div className="absolute inset-0 flex items-center justify-center p-[1.5vh]" style={{ background: 'var(--color-bg-deep)' }}>
+          <div className={gameStyles.streamCard}>
+            {/* ANIME WIZ Headline */}
+            <div className="text-center pt-2 pb-1 shrink-0">
+              <div className={gameStyles.streamHeadline}>
+                ANIME WIZ
+              </div>
+            </div>
+
+            {/* Top Bar */}
+            <div className={gameStyles.streamTopBar}>
+              <span className={gameStyles.streamQNumber}>
+                Q {game.questionsAsked}/{game.totalQuestions}
+              </span>
+              <span className={gameStyles.streamScore}>
+                R {game.currentRound}
+              </span>
+            </div>
+
+            {/* Timer */}
+            <div className="text-center shrink-0">
+              <div className={`${gameStyles.streamTimer} ${
+                game.timeRemaining > 10 ? gameStyles.timerGreen :
+                game.timeRemaining > 5 ? gameStyles.timerYellow :
+                gameStyles.timerRed
+              }`}>
+                {game.timeRemaining}
+              </div>
+              <div className={gameStyles.streamTimerBar}>
+                <div
+                  className={`${gameStyles.streamTimerFill} ${
+                    game.timeRemaining <= 5 ? gameStyles.streamTimerCritical :
+                    game.timeRemaining <= 10 ? gameStyles.streamTimerWarn :
+                    ''
+                  }`}
+                  style={{ width: `${(game.timeRemaining / game.currentQuestion.timeLimit) * 100}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Question */}
+            <div className={gameStyles.streamQPanel}>
+              <p className={`${gameStyles.streamQText} ${m ? 'text-xl' : 'text-2xl xl:text-3xl'}`}>
+                {game.currentQuestion.question}
+              </p>
+            </div>
+
+            {/* Answers */}
+            <div className={gameStyles.streamAnsList}>
+              {game.currentQuestion.options.map((opt, i) => {
+                const letter = String.fromCharCode(65 + i);
+                const isCorrect = game.correctAnswer === letter;
+                const isWrong = game.correctAnswer && game.correctAnswer !== letter;
+                const answerCount = game.answerDistribution?.[letter as "A" | "B" | "C" | "D"] || 0;
+                const pct = totalAnswers > 0 ? Math.round((answerCount / totalAnswers) * 100) : 0;
+                const showPct = game.status === "revealing";
+
+                const badgeColors = [gameStyles.streamBadgeA, gameStyles.streamBadgeB, gameStyles.streamBadgeC, gameStyles.streamBadgeD];
+                const badgeClass = isCorrect ? gameStyles.streamBadgeCorrect : isWrong ? gameStyles.streamBadgeWrong : badgeColors[i];
+
+                return (
+                  <div
+                    key={i}
+                    className={`${gameStyles.streamAnsCard} ${
+                      isCorrect ? gameStyles.streamAnsCorrect :
+                      isWrong ? gameStyles.streamAnsWrong :
+                      ''
+                    } ${m ? 'min-h-[70px]' : 'min-h-[80px]'}`}
+                  >
+                    <div className={`${gameStyles.streamBadge} ${badgeClass}`}>
+                      {letter}
+                    </div>
+                    <span className={`${gameStyles.streamAnsText} text-center ${m ? 'text-base' : 'text-lg xl:text-xl'}`}>
+                      {opt.replace(/^[A-D]\)\s*/, "")}
+                    </span>
+                    {showPct && (
+                      <span className={`${gameStyles.streamPct} ${m ? 'text-xl' : 'text-2xl'}`}>
+                        {pct}%
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Reveal Banner */}
+            {game.status === "revealing" && game.correctAnswer && (
+              <div className={gameStyles.streamReveal}>
+                {game.winnerDisplayName ? (
+                  <div>
+                    <p className={`${gameStyles.streamRevealText} ${m ? 'text-lg' : 'text-xl xl:text-2xl'}`}>
+                      🏆 {game.winnerDisplayName}
+                    </p>
+                    <p className="text-sm text-green-300 mt-1">
+                      answered {game.correctAnswer} in {game.correctAnswerers?.[0]?.time.toFixed(1)}s!
+                    </p>
+                    {game.correctAnswerers && game.correctAnswerers.length > 1 && (
+                      <p className="text-xs text-gray-400 mt-1">
+                        +{game.correctAnswerers.length - 1} also correct
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <p className={gameStyles.streamRevealText}>
+                    💀 Nobody got it! Answer: {game.correctAnswer}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Player Answer Notification */}
+            {mascotMessages.length > 0 && (
+              <div className={gameStyles.streamNotify}>
+                {mascotMessages.slice(-1).map(msg => (
+                  <p key={msg.id} className={`${gameStyles.streamNotifyText} ${m ? 'text-base' : 'text-lg'}`}>
+                    {msg.text}
+                  </p>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* WAITING SCREEN */}
       {game?.status === "waiting" && (
         <div className={`absolute inset-0 flex items-center justify-center ${gameStyles.waitingScreen}`}>
@@ -475,7 +602,7 @@ export default function OverlayPage() {
       )}
 
       {/* ACTIVE GAME */}
-      {((game && (
+      {((game && !isQuizMode && (
         game.status === "active" ||
         game.status === "question" ||
         game.status === "revealing" ||

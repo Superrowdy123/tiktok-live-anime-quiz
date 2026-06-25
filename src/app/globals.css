@@ -28,6 +28,16 @@
   --font-display: 'Bangers', cursive;
   --font-body: 'Nunito', sans-serif;
   --font-mono: 'Space Mono', monospace;
+
+  /* TikTok Stream colors */
+  --quiz-correct: #00FF88;
+  --quiz-wrong: #FF2244;
+  --quiz-cyan: #00D4FF;
+  --quiz-yellow: #FFD700;
+  --quiz-orange: #FF8C00;
+  --timer-green: #00FF88;
+  --timer-yellow: #FFD700;
+  --timer-red: #FF2244;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -342,9 +352,8 @@ body {
 
 .phone-bezel {
   position: relative;
-  height: 92vh;
-  width: calc(92vh * 9 / 16);
-  max-width: calc(100vw - 24px);
+  height: min(95vh, calc(100vh - 24px));
+  width: calc(min(max(420px, 95vh * 9 / 16), calc(100vw - 24px)));
   background: linear-gradient(145deg, #2a2a2e 0%, #1a1a1e 40%, #111114 100%);
   border-radius: clamp(32px, 5vh, 54px);
   padding: clamp(4px, 0.6vh, 8px);

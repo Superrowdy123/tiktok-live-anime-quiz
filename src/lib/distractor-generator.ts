@@ -2,12 +2,12 @@ import { generateMCFromAnswer, searchLibrary, type LibraryEntry } from "@/data/c
 import type { QuizMode } from "./image-quiz-types";
 
 const FALLBACK_DISTRACTORS: Record<QuizMode, string[]> = {
-  character: ["Sasuke Uchiha", "Goku", "Luffy"],
-  anime: ["Naruto", "One Piece", "Dragon Ball Z"],
-  hair: ["Goku", "Sasuke Uchiha", "Ichigo Kurosaki"],
-  weapon: ["Zangetsu", "Death Note", "Nichirin Blade"],
-  symbol: ["Sharingan", "Akatsuki Cloud", "Straw Hat Jolly Roger"],
-  outfit: ["Naruto Uzumaki", "Goku", "Monkey D. Luffy"],
+  character: ["Sasuke Uchiha", "Goku", "Luffy", "Naruto Uzumaki", "Gojo Satoru", "Light Yagami", "Tanjiro Kamado", "Levi Ackerman", "Ichigo Kurosaki", "Edward Elric"],
+  anime: ["Naruto", "One Piece", "Dragon Ball Z", "Attack on Titan", "Demon Slayer", "Jujutsu Kaisen", "Death Note", "My Hero Academia", "Chainsaw Man", "Fullmetal Alchemist"],
+  hair: ["Goku", "Sasuke Uchiha", "Ichigo Kurosaki", "Naruto Uzumaki", "Luffy", "Gojo Satoru", "Edward Elric", "Killua Zoldyck", "Denji", "Levi Ackerman"],
+  weapon: ["Zangetsu", "Death Note", "Nichirin Blade", "3D Maneuver Gear", "Tessaiga", "Rasengan", "Scissor Blade", "Murasame", "Gomu Gomu no Mi", "Dominator"],
+  symbol: ["Sharingan", "Akatsuki Cloud", "Straw Hat Jolly Roger", "Dragon Ball", "Survey Corps Wings", "Hidden Leaf Symbol", "NERV Logo", "Joestar Birthmark", "Geass Sigil", "Uchiha Clan Crest"],
+  outfit: ["Naruto Uzumaki", "Goku", "Monkey D. Luffy", "Sasuke Uchiha", "Ichigo Kurosaki", "Edward Elric", "Levi Ackerman", "Light Yagami", "Gojo Satoru", "Tanjiro Kamado"],
 };
 
 export interface DistractorResult {
