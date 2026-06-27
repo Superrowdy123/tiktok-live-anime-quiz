@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
       case "start": {
         const { round = 1 } = body;
         const sessionId = await saveToDatabase("start", engine) || Date.now();
-        engine.startGame({ round, sessionId: typeof sessionId === "number" ? sessionId : Date.now() });
+        await engine.startGame({ round, sessionId: typeof sessionId === "number" ? sessionId : Date.now() });
         return NextResponse.json({ success: true, sessionId, round: engine.getCurrentRound(), totalRounds: engine.getTotalRounds() });
       }
       case "next_question": { engine.nextQuestion(); return NextResponse.json({ success: true }); }

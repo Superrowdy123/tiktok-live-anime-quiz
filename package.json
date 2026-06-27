@@ -6,7 +6,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "seed": "npx tsx src/scripts/seed.ts"
   },
   "dependencies": {
     "@types/tmi.js": "^1.8.6",

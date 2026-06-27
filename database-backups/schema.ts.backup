@@ -78,24 +78,3 @@ export const statistics = pgTable("statistics", {
   value: text("value").notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
-
-// ─── Questions Database (NEW - separate from static file questions) ───
-export const questions = pgTable("questions", {
-  id: serial("id").primaryKey(),
-  question: text("question").notNull(),
-  correctAnswer: text("correct_answer").notNull(),
-  choices: text("choices").array().notNull(),
-  explanation: text("explanation").notNull(),
-  category: text("category").notNull(),
-  anime: text("anime").notNull(),
-  difficulty: text("difficulty").notNull(), // easy, medium, hard
-  tags: text("tags").array().default([]),
-  points: integer("points").notNull().default(10),
-  imageUrl: text("image_url"),
-  hint: text("hint"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
-
-export type Question = typeof questions.$inferSelect;
-export type NewQuestion = typeof questions.$inferInsert;

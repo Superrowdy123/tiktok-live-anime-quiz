@@ -37,6 +37,9 @@
     ".next/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "src/data/part1.ts",
+    "src/data/part2.ts",
+    "src/data/part3.ts"
   ]
 }

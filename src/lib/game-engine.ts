@@ -1,5 +1,5 @@
 import type { Player, GameState, MascotMessage, PowerUpType, PowerScalingFighter, PowerScalingBattle } from "./types";
-import allQuestions, { getQuestionsForRound, getTotalRounds, type Question } from "@/data/questions";
+import allQuestions, { getQuestionsForRound, getTotalRounds, getInitPromise, type Question } from "@/data/questions";
 const DIFFICULTY_POINTS: Record<string, number> = { easy: 10, medium: 20, hard: 30 };
 const STREAK_BONUSES: Record<number, number> = { 1: 5, 3: 15, 5: 30, 10: 100 };
 const TITLES: { minPoints: number; title: string }[] = [
@@ -102,10 +102,11 @@ export class GameEngine {
  // EXISTING: Quiz mode (unchanged logic)
  // 
 
- startGame(options: { round?: number; sessionId: number }) {
- const { round = 1, sessionId } = options;
- this.currentRound = Math.max(1, Math.min(round, getTotalRounds()));
- this.roundQuestions = getQuestionsForRound(this.currentRound);
+  async startGame(options: { round?: number; sessionId: number }) {
+  await getInitPromise();
+  const { round = 1, sessionId } = options;
+  this.currentRound = Math.max(1, Math.min(round, getTotalRounds()));
+  this.roundQuestions = getQuestionsForRound(this.currentRound);
  this.players.clear(); this.antiCheat.clear();
  this.answerDistribution = { A: 0, B: 0, C: 0, D: 0 }; this.correctAnswerers = [];
   this.gameMode = "quiz";
