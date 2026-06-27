@@ -1,0 +1,25 @@
+databases:
+  - name: anime-quiz-db
+    databaseName: anime_quiz
+    plan: free
+    ipAllowList: []
+
+services:
+  - type: web
+    name: anime-quiz
+    env: node
+    region: singapore
+    plan: free
+    buildCommand: npm install && npx drizzle-kit push && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: anime-quiz-db
+          property: connectionString
+    buildFilter:
+      paths:
+        - src/**/*.ts
+        - src/**/*.tsx
+        - package.json
+        - package-lock.json
