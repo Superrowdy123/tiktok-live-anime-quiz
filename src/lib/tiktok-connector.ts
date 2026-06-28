@@ -100,9 +100,6 @@ export async function connectToTikTok(username: string): Promise<{ success: bool
 
       console.log(`[TikTok Chat] ${displayName}: ${message}`);
 
-      // Forward to game engine AND arena engine
-      const engine = getGameEngine();
-
       // Try arena first (if active)
       try {
         const { getArenaEngine } = require("./arena-engine");
@@ -113,6 +110,23 @@ export async function connectToTikTok(username: string): Promise<{ success: bool
         }
       } catch { /* arena not loaded */ }
 
+      // Try image quiz engine (if active)
+      try {
+        const { getNewImageQuizEngine } = require("./new-image-quiz-engine");
+        const iqEngine = getNewImageQuizEngine();
+        const iqSession = iqEngine.getSession();
+        if (iqSession && iqSession.status === "active") {
+          const iqResult = iqEngine.processAnswer(username, displayName, message);
+          if (iqResult.correct) {
+            state.answerCount++;
+            console.log(`[TikTok] ✅ ${displayName} answered image quiz correctly!`);
+          }
+          return;
+        }
+      } catch { /* image quiz engine not loaded */ }
+
+      // Fall back to normal quiz engine
+      const engine = getGameEngine();
       const result = engine.processAnswer(username, displayName, message);
 
       if (result.correct) {

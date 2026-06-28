@@ -79,15 +79,7 @@ export async function connectToTwitch(channel: string): Promise<{ success: boole
 
       console.log(`[Twitch Chat] ${displayName}: ${msg}`);
 
-      const engine = getGameEngine();
-      const result = engine.processAnswer(username, displayName, msg);
-
-      if (result.correct) {
-        state.answerCount++;
-        console.log(`[Twitch] ${displayName} answered correctly!`);
-      }
-
-      // Also forward to arena
+      // Try arena first (if active)
       try {
         const { getArenaEngine } = require("./arena-engine");
         const arena = getArenaEngine();
@@ -96,6 +88,30 @@ export async function connectToTwitch(channel: string): Promise<{ success: boole
           arena.processVote(username, displayName, msg);
         }
       } catch { /* arena not loaded */ }
+
+      // Try image quiz engine (if active)
+      try {
+        const { getNewImageQuizEngine } = require("./new-image-quiz-engine");
+        const iqEngine = getNewImageQuizEngine();
+        const iqSession = iqEngine.getSession();
+        if (iqSession && iqSession.status === "active") {
+          const iqResult = iqEngine.processAnswer(username, displayName, msg);
+          if (iqResult.correct) {
+            state.answerCount++;
+            console.log(`[Twitch] ✅ ${displayName} answered image quiz correctly!`);
+          }
+          return;
+        }
+      } catch { /* image quiz engine not loaded */ }
+
+      // Fall back to normal quiz engine
+      const engine = getGameEngine();
+      const result = engine.processAnswer(username, displayName, msg);
+
+      if (result.correct) {
+        state.answerCount++;
+        console.log(`[Twitch] ${displayName} answered correctly!`);
+      }
     });
 
     client.on("disconnected", (reason: string) => {
