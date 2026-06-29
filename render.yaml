@@ -8,10 +8,11 @@ services:
   - type: web
     name: anime-quiz
     env: node
-    region: singapore
+    region: oregon
     plan: free
     buildCommand: npm install && npx drizzle-kit push && npm run build
     startCommand: npm run start
+    healthCheckPath: /api/health
     envVars:
       - key: DATABASE_URL
         fromDatabase:

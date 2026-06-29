@@ -76,16 +76,13 @@ const TEMPLATES: Template[] = [
     category: "Character",
     generate: (a) => {
       if (a.characters.length < 4) return null;
-      const correct = pick(a.characters);
-      const choices = makeChoices(correct, a.characters);
-      const diff = a.characters.indexOf(correct) === 0 ? "easy" : pickDifficulty();
       return {
-        question: `Which character is the main protagonist of ${a.title}?`,
+        question: `Who is the main protagonist of ${a.title}?`,
         correctAnswer: a.protagonist,
         choices: makeChoices(a.protagonist, a.characters),
         explanation: `${a.protagonist} is the main protagonist of ${a.title}.`,
         category: "Character", anime: a.title,
-        difficulty: pickDifficulty(),
+        difficulty: "easy",
         tags: [a.id, "protagonist"],
         hint: `This character is the main hero of ${a.title}`,
       };
@@ -104,7 +101,7 @@ const TEMPLATES: Template[] = [
         choices: makeChoices(a.title, [...lib.keys()].map(k => lib.get(k)!.title)),
         explanation: `${correct} is a character from ${a.title}.`,
         category: "Anime", anime: a.title,
-        difficulty: pickDifficulty(),
+        difficulty: "easy",
         tags: [a.id, "character"],
         hint: `This character appears in ${a.title}`,
       };
@@ -121,7 +118,7 @@ const TEMPLATES: Template[] = [
         choices: makeChoices(correct, a.villains),
         explanation: `${correct} is one of the main antagonists in ${a.title}.`,
         category: "Villain", anime: a.title,
-        difficulty: pickDifficulty(),
+        difficulty: "easy",
         tags: [a.id, "villain"],
         hint: `This villain opposes the protagonist of ${a.title}`,
       };
@@ -138,7 +135,7 @@ const TEMPLATES: Template[] = [
         choices: makeChoices(correct, a.abilities),
         explanation: `${correct} is one of the abilities featured in ${a.title}.`,
         category: "Power", anime: a.title,
-        difficulty: pickDifficulty(),
+        difficulty: "easy",
         tags: [a.id, "power", "ability"],
         hint: `This power is prominently featured in ${a.title}`,
       };
@@ -155,7 +152,7 @@ const TEMPLATES: Template[] = [
         choices: makeChoices(correct, a.techniques),
         explanation: `${correct} is a technique used in ${a.title}.`,
         category: "Technique", anime: a.title,
-        difficulty: pickDifficulty(),
+        difficulty: "medium",
         tags: [a.id, "technique"],
         hint: `This technique appears in ${a.title}`,
       };
@@ -189,7 +186,7 @@ const TEMPLATES: Template[] = [
         choices: makeChoices(correct, a.locations),
         explanation: `${correct} is an important location in ${a.title}.`,
         category: "Location", anime: a.title,
-        difficulty: pickDifficulty(),
+        difficulty: "medium",
         tags: [a.id, "location"],
         hint: `This place is important to the story of ${a.title}`,
       };
@@ -223,7 +220,7 @@ const TEMPLATES: Template[] = [
         choices: makeChoices(correct, a.arcs),
         explanation: `${correct} is a story arc in ${a.title}.`,
         category: "Arc", anime: a.title,
-        difficulty: pickDifficulty(),
+        difficulty: "hard",
         tags: [a.id, "arc"],
         hint: `This arc is a major storyline in ${a.title}`,
       };
@@ -305,7 +302,7 @@ const TEMPLATES: Template[] = [
         choices: makeChoices(String(a.yearStarted), [...lib.keys()].map(k => String(lib.get(k)!.yearStarted))),
         explanation: `${a.title} first aired in ${a.yearStarted}.`,
         category: "Anime", anime: a.title,
-        difficulty: pickDifficulty(),
+        difficulty: "hard",
         tags: [a.id, "year", "air date"],
         hint: `This series began in the ${Math.floor(a.yearStarted / 10) * 0}s`,
       };
@@ -321,7 +318,7 @@ const TEMPLATES: Template[] = [
         choices: makeChoices(correct, [...new Set([...lib.keys()].flatMap(k => lib.get(k)!.genres))]),
         explanation: `${a.title} is a ${correct} anime.`,
         category: "Anime", anime: a.title,
-        difficulty: pickDifficulty(),
+        difficulty: "easy",
         tags: [a.id, "genre"],
         hint: `Think about what category ${a.title} falls into`,
       };
@@ -341,7 +338,7 @@ const TEMPLATES: Template[] = [
         choices: ["Family member/Family", "Rivals", "Enemies", "Friends"],
         explanation: `${member} and ${relative} are family members in ${a.title}.`,
         category: "Family", anime: a.title,
-        difficulty: pickDifficulty(),
+        difficulty: "hard",
         tags: [a.id, "family", "relationship"],
         hint: `They share blood relations in ${a.title}`,
       };

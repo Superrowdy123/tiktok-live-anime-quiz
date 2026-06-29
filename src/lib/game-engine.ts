@@ -1,5 +1,5 @@
 import type { Player, GameState, MascotMessage, PowerUpType, PowerScalingFighter, PowerScalingBattle } from "./types";
-import allQuestions, { getQuestionsForRound, getTotalRounds, getInitPromise, type Question } from "@/data/questions";
+import allQuestions, { getQuestionsForRound, getTotalRounds, type Question } from "@/data/questions";
 const DIFFICULTY_POINTS: Record<string, number> = { easy: 10, medium: 20, hard: 30 };
 const STREAK_BONUSES: Record<number, number> = { 1: 5, 3: 15, 5: 30, 10: 100 };
 const TITLES: { minPoints: number; title: string }[] = [
@@ -30,8 +30,9 @@ export type GameMode = "quiz" | "power_scaling";
 
 export class GameEngine {
  // Existing state 
- private currentRound = 1;
- private roundQuestions: Question[] = [];
+  private currentRound = 1;
+  private cachedTotalRounds = 0;
+  private roundQuestions: Question[] = [];
  private players: Map<string, Player> = new Map();
  private antiCheat: Map<string, { lastMessageTime: number; messageCount: number; cooldownUntil: number; warnings: number }> = new Map();
  private answeredThisQuestion: Set<string> = new Set();
@@ -89,7 +90,7 @@ export class GameEngine {
  }
 
  getCurrentRound(): number { return this.currentRound; }
- getTotalRounds(): number { return getTotalRounds(); }
+  getTotalRounds(): number { return this.cachedTotalRounds; }
  getAnswerDistribution(): AnswerDistribution { return { ...this.answerDistribution }; }
  getCorrectAnswerers() { return [...this.correctAnswerers]; }
   getGameMode(): GameMode { return this.gameMode; }
@@ -102,11 +103,12 @@ export class GameEngine {
  // EXISTING: Quiz mode (unchanged logic)
  // 
 
-  async startGame(options: { round?: number; sessionId: number }) {
-  await getInitPromise();
-  const { round = 1, sessionId } = options;
-  this.currentRound = Math.max(1, Math.min(round, getTotalRounds()));
-  this.roundQuestions = getQuestionsForRound(this.currentRound);
+   async startGame(options: { round?: number; sessionId: number }) {
+   const totalRounds = await getTotalRounds();
+   this.cachedTotalRounds = totalRounds;
+   const { round = 1, sessionId } = options;
+   this.currentRound = Math.max(1, Math.min(round, totalRounds));
+   this.roundQuestions = await getQuestionsForRound(this.currentRound);
  this.players.clear(); this.antiCheat.clear();
  this.answerDistribution = { A: 0, B: 0, C: 0, D: 0 }; this.correctAnswerers = [];
   this.gameMode = "quiz";
@@ -402,7 +404,7 @@ export class GameEngine {
  for (const p of players) if (!mostActive || p.totalAnswers > mostActive.totalAnswers) mostActive = p;
  return { ...this.state.stats, totalPlayers: players.length, mostActivePlayer: mostActive?.displayName ?? null,
  sessionDuration: this.state.stats.startTime ? Date.now() - this.state.stats.startTime : 0,
- currentRound: this.currentRound, totalRounds: getTotalRounds(), gameMode: this.gameMode };
+  currentRound: this.currentRound, totalRounds: this.cachedTotalRounds, gameMode: this.gameMode };
  }
 
  getExportData() {

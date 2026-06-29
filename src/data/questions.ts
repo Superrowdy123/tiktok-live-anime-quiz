@@ -4,8 +4,9 @@ export interface Question {
   options: [string,string,string,string]; answer: "A"|"B"|"C"|"D"; timeLimit: number;
 }
 
-let cache: Question[] = [];
+let cache: Question[] | null = null;
 let totalRounds = 0;
+let loadPromise: Promise<void> | null = null;
 
 async function loadFromDb(): Promise<void> {
   try {
@@ -33,7 +34,6 @@ async function loadFromDb(): Promise<void> {
     const medium = mapped.filter(q => q.difficulty === "medium");
     const hard = mapped.filter(q => q.difficulty === "hard");
 
-    // Interleave: E, M, H, E, M, H, ... using all available questions
     const ordered: Question[] = [];
     let ei = 0, mi = 0, hi = 0;
     while (ei < easy.length || mi < medium.length || hi < hard.length) {
@@ -49,28 +49,36 @@ async function loadFromDb(): Promise<void> {
     });
 
     cache = ordered;
-
-    cache = mapped;
+    console.log(`[Questions] Loaded ${ordered.length} questions, ${totalRounds} rounds`);
   } catch (e) {
-    console.warn("Failed to load questions from DB, using empty pool:", e);
-    cache = [];
+    console.warn("[Questions] Failed to load from DB:", e);
+    cache = null;
     totalRounds = 0;
   }
 }
 
-// Preload at module initialization
-const initPromise = loadFromDb();
-
-export function getQuestionsForRound(round: number): Question[] {
-  return cache.filter(q => q.round === round);
+async function ensureLoaded(): Promise<void> {
+  if (cache) return;
+  if (loadPromise) return loadPromise;
+  loadPromise = loadFromDb();
+  return loadPromise;
 }
 
-export function getTotalRounds(): number {
+// Preload at module initialization
+loadFromDb();
+
+export async function getQuestionsForRound(round: number): Promise<Question[]> {
+  await ensureLoaded();
+  return (cache ?? []).filter(q => q.round === round);
+}
+
+export async function getTotalRounds(): Promise<number> {
+  await ensureLoaded();
   return totalRounds;
 }
 
 export function getInitPromise(): Promise<void> {
-  return initPromise;
+  return loadPromise ?? Promise.resolve();
 }
 
 const allQuestions: Question[] = [];
